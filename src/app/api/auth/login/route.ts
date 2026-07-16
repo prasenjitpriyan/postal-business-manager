@@ -40,10 +40,19 @@ export async function POST(req: NextRequest) {
       role: user.role,
     };
 
-    // Return the token in the response and also set it in an HttpOnly cookie for security if needed
-    // For this implementation, we will rely on Authorization header token passing
-    return successResponse({ user: userData, token }, 'Login successful', 200);
+    const response = successResponse({ user: userData, token }, 'Login successful', 200);
+    
+    // Set cookie on the server side so the proxy has access to it immediately
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      path: '/',
+      maxAge: 2592000,
+      sameSite: 'strict',
+      // httpOnly: false, // Let the frontend read it if needed, or rely on the JSON payload
+    });
 
+    return response;
   } catch (error: unknown) {
     console.error('Login error:', error);
     return errorResponse((error as Error).message || 'Server Error', 500);

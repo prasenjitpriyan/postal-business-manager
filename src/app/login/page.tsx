@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,7 +29,6 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,7 +59,11 @@ export default function LoginPage() {
 
       login(responseData.data.user, responseData.data.token);
       toast.success('Login successful!');
-      router.push('/dashboard');
+      
+      // Use window.location.href instead of router.push to force a full page reload.
+      // This ensures the Next.js App Router completely clears its cache and the 
+      // newly set cookie is correctly read by the proxy on the first navigation.
+      window.location.assign('/dashboard');
       
     } catch (error: unknown) {
       toast.error((error as Error).message || 'Something went wrong. Please try again.');

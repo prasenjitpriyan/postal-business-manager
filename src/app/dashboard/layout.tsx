@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
@@ -10,19 +10,27 @@ import { Button } from '@/components/ui/button';
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // In a real app we'd rely on middleware, but Zustand gives us client-side checks
-    if (!isAuthenticated) {
+    const timer = setTimeout(() => setIsMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect if we are mounted (hydrated) and not authenticated
+    if (isMounted && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isMounted, isAuthenticated, router]);
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
 
+  // Prevent hydration mismatch by returning null until mounted on the client
+  if (!isMounted) return null;
   if (!isAuthenticated) return null;
 
   return (
