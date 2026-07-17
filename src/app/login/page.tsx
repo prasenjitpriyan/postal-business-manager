@@ -76,9 +76,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="space-y-2 text-center pb-6">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <Mail className="text-white w-8 h-8" />
-          </div>
+          <Link href="/">
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
+              <Mail className="text-white w-8 h-8" />
+            </div>
+          </Link>
           <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
             Postal Business Manager
           </CardTitle>
