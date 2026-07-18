@@ -52,40 +52,50 @@ export default function LandingPage() {
 
     // Initial sequence
     tl.fromTo('header', 
-      { y: -50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' },
       0
+    )
+    .fromTo(['.header-logo', '.header-link'],
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)' },
+      0.2
     )
     .fromTo('.hero-badge', 
       { scale: 0.8, y: 20, opacity: 0 },
       { scale: 1, y: 0, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' },
-      0.3
+      0.4
     )
     // Advanced 3D staggered text reveal for title
     .fromTo('.hero-word', 
       { y: 50, opacity: 0, rotateX: -90, transformOrigin: "0% 50% -50" },
       { y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.1, ease: 'back.out(1.5)' },
-      0.5
+      0.6
     )
     .fromTo('.hero-text', 
       { y: 20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' },
-      1.0
+      1.1
     )
     .fromTo('.hero-btn', 
       { scale: 0.5, opacity: 0 },
       { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.5)' },
-      1.2
+      1.3
     )
     .fromTo('.feature-card', 
       { y: 50, opacity: 0, scale: 0.95 },
       { y: 0, opacity: 1, scale: 1, duration: 0.7, stagger: 0.15, ease: 'power3.out' },
-      1.4
+      1.5
     )
     .fromTo('footer', 
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, ease: 'power3.out' },
       1.8
+    )
+    .fromTo(['.footer-brand', '.footer-text', '.footer-link'],
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.5)' },
+      2.0
     );
 
     // Continuous floating animation for the badge
@@ -139,17 +149,17 @@ export default function LandingPage() {
       </div>
 
       <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10 backdrop-blur-md bg-slate-950/50">
-        <div className="flex items-center gap-3">
+        <div className="header-logo flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Box className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold tracking-tight">Postal Manager</span>
         </div>
         <nav className="flex items-center gap-6">
-          <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+          <Link href="/login" className="header-link text-sm font-medium text-slate-300 hover:text-white transition-colors">
             Sign In
           </Link>
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="header-link">
             <Button className="bg-white text-slate-950 hover:bg-slate-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Go to Dashboard
             </Button>
@@ -217,21 +227,21 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 bg-slate-950/30 backdrop-blur-md py-10 px-8 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+          <div className="footer-brand flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Box className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold tracking-tight">Postal Manager</span>
           </div>
           
-          <p className="text-slate-500 text-sm">
+          <p className="footer-text text-slate-500 text-sm">
             © {new Date().getFullYear()} Postal Business Manager. All rights reserved.
           </p>
           
           <div className="flex gap-6">
-            <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
+            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
           </div>
         </div>
       </footer>
