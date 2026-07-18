@@ -92,7 +92,7 @@ export function ContributionsTable() {
         <Button>Add Contribution</Button>
       </div>
       
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

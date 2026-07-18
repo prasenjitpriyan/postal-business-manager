@@ -9,6 +9,8 @@ export interface Official {
   phone: string;
   designation: string;
   office: string;
+  email?: string;
+  joiningDate?: string;
   status: OfficialStatus;
   createdAt: string;
   updatedAt: string;

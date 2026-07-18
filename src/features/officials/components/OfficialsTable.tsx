@@ -20,6 +20,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Official, OfficialStatus } from '@/types/official';
+import { AddOfficialDialog } from './AddOfficialDialog';
+import { EditOfficialDialog } from './EditOfficialDialog';
 
 export function OfficialsTable() {
   const [page, setPage] = useState(1);
@@ -65,10 +67,10 @@ export function OfficialsTable() {
     },
     {
       id: 'actions',
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">Edit</Button>
+            <EditOfficialDialog official={row.original} />
             {/* Add Delete Dialog here */}
           </div>
         );
@@ -93,10 +95,10 @@ export function OfficialsTable() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Button>Add Official</Button>
+          <AddOfficialDialog />
       </div>
       
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
