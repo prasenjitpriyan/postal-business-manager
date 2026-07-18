@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import { Official } from '@/types/official';
+import { Pencil } from 'lucide-react';
 
 interface EditOfficialDialogProps {
   official: Official;
@@ -73,7 +74,15 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>Edit</Button>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={() => setOpen(true)}
+        className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors h-8 w-8"
+        title="Edit Official"
+      >
+        <Pencil className="w-4 h-4" />
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

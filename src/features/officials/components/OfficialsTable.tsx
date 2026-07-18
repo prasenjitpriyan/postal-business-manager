@@ -22,6 +22,7 @@ import {
 import { Official, OfficialStatus } from '@/types/official';
 import { AddOfficialDialog } from './AddOfficialDialog';
 import { EditOfficialDialog } from './EditOfficialDialog';
+import { DeleteOfficialDialog } from './DeleteOfficialDialog';
 
 export function OfficialsTable() {
   const [page, setPage] = useState(1);
@@ -71,7 +72,7 @@ export function OfficialsTable() {
         return (
           <div className="flex gap-2">
             <EditOfficialDialog official={row.original} />
-            {/* Add Delete Dialog here */}
+            <DeleteOfficialDialog officialId={row.original._id} officialName={row.original.name} />
           </div>
         );
       },
