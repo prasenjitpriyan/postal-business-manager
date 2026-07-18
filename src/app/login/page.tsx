@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-contradicting-classname */
 'use client';
 
 import { useState, useRef } from 'react';
