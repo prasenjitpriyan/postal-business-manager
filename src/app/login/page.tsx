@@ -148,7 +148,7 @@ export default function LoginPage() {
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 transition-colors group-focus-within:text-blue-500" />
                         <Input
                           placeholder="admin@indiapost.gov.in"
-                          className="h-12 pl-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 focus-visible:border-blue-500 placeholder:text-slate-600 transition-all rounded-xl"
+                          className="h-12 pl-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 focus-visible:border-blue-500 placeholder-slate-600 transition-all rounded-xl"
                           {...field}
                           disabled={isLoading}
                         />
@@ -170,7 +170,7 @@ export default function LoginPage() {
                         <Input
                           type="password"
                           placeholder="••••••••"
-                          className="h-12 pl-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 focus-visible:border-blue-500 placeholder:text-slate-600 transition-all rounded-xl"
+                          className="h-12 pl-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 focus-visible:border-blue-500 placeholder-slate-600 transition-all rounded-xl"
                           {...field}
                           disabled={isLoading}
                         />
