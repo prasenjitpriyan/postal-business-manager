@@ -68,19 +68,19 @@ export function DeleteOfficialDialog({ officialId, officialName }: DeleteOfficia
       </Button>
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-slate-950/90 backdrop-blur-md border border-white/10 text-slate-100">
           <DialogHeader>
             <DialogTitle>Delete Official</DialogTitle>
-            <DialogDescription className="mt-2">
+            <DialogDescription className="mt-2 text-slate-300">
               Are you sure you want to delete <strong>{officialName}</strong>? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           
           <div className="pt-4 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading} className="bg-transparent border-white/10 text-slate-300 hover:bg-white/10 hover:text-white">
               Cancel
             </Button>
-            <Button type="button" variant="destructive" onClick={handleDelete} disabled={loading}>
+            <Button type="button" variant="destructive" onClick={handleDelete} disabled={loading} className="bg-red-600 hover:bg-red-500 text-white border-0 shadow-[0_0_15px_rgba(220,38,38,0.3)]">
               {loading ? 'Deleting...' : 'Delete'}
             </Button>
           </div>

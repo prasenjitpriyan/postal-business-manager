@@ -89,17 +89,17 @@ export function OfficialsTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <Input
           placeholder="Search officials..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
+          className="w-full sm:max-w-sm"
         />
           <AddOfficialDialog />
       </div>
       
-      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm">
+      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

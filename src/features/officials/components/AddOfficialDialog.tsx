@@ -71,9 +71,9 @@ export function AddOfficialDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Add Official</Button>
+      <Button onClick={() => setOpen(true)} className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] border-0">Add Official</Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-slate-950/90 backdrop-blur-md border border-white/10 text-slate-100">
           <DialogHeader>
             <DialogTitle>Add New Official</DialogTitle>
           </DialogHeader>
@@ -82,7 +82,7 @@ export function AddOfficialDialog() {
               <label htmlFor="name" className="text-sm font-medium">
                 Name *
               </label>
-              <Input id="name" name="name" required value={formData.name} onChange={handleChange} />
+              <Input id="name" name="name" required value={formData.name} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -95,6 +95,7 @@ export function AddOfficialDialog() {
                   required
                   value={formData.designation}
                   onChange={handleChange}
+                  className="bg-slate-900/50 border-white/10 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -107,10 +108,11 @@ export function AddOfficialDialog() {
                   required
                   value={formData.office}
                   onChange={handleChange}
+                  className="bg-slate-900/50 border-white/10 text-slate-100"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="phone" className="text-sm font-medium">
                   Phone *
@@ -121,6 +123,7 @@ export function AddOfficialDialog() {
                   required
                   value={formData.phone}
                   onChange={handleChange}
+                  className="bg-slate-900/50 border-white/10 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -133,10 +136,11 @@ export function AddOfficialDialog() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
+                  className="bg-slate-900/50 border-white/10 text-slate-100"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="joiningDate" className="text-sm font-medium">
                   Joining Date *
@@ -148,6 +152,7 @@ export function AddOfficialDialog() {
                   required
                   value={formData.joiningDate}
                   onChange={handleChange}
+                  className="bg-slate-900/50 border-white/10 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -159,7 +164,7 @@ export function AddOfficialDialog() {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="flex h-8 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-slate-100"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -167,10 +172,10 @@ export function AddOfficialDialog() {
               </div>
             </div>
             <div className="pt-4 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="bg-transparent border-white/10 text-slate-300 hover:bg-white/10 hover:text-white">
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="bg-indigo-600 hover:bg-indigo-500 text-white border-0">
                 {loading ? 'Adding...' : 'Add Official'}
               </Button>
             </div>
