@@ -243,12 +243,12 @@ export default function SignupPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="auth-form-item flex justify-center border-t border-white/10 p-4 mt-4">
-          <p className="text-sm text-slate-400">
+        <CardFooter className="auth-form-item flex justify-center border-t border-white/10 p-5 mt-2 bg-white/5 rounded-b-xl backdrop-blur-sm">
+          <p className="text-sm text-slate-300 font-medium">
             Already have an account?{' '}
             <Link
               href="/login"
-              className="text-blue-400 hover:text-blue-300 hover:underline font-medium transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-bold transition-all hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] ml-1"
             >
               Log in
             </Link>
