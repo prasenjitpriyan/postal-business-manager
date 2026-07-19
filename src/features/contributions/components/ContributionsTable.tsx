@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { BusinessContribution } from '@/types/contribution';
+import { AddContributionDialog } from './AddContributionDialog';
 
 export function ContributionsTable() {
   const [page, setPage] = useState(1);
@@ -64,8 +66,12 @@ export function ContributionsTable() {
       cell: () => {
         return (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">Edit</Button>
-            {/* Delete Dialog Placeholder */}
+            <Button variant="ghost" size="icon" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors h-8 w-8" title="Edit Contribution">
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors h-8 w-8" title="Delete Contribution">
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         );
       },
@@ -89,7 +95,7 @@ export function ContributionsTable() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:max-w-sm"
         />
-        <Button>Add Contribution</Button>
+        <AddContributionDialog />
       </div>
       
       <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
