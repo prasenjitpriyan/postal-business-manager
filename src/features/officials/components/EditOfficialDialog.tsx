@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
-import { Official } from '@/types/official';
+import { Official, OfficialStatus } from '@/types/official';
 import { Pencil } from 'lucide-react';
 
 interface EditOfficialDialogProps {
@@ -33,7 +33,7 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
     phone: official.phone || '',
     email: official.email || '',
     joiningDate: official.joiningDate ? new Date(official.joiningDate).toISOString().split('T')[0] : '',
-    status: official.status || 'Active',
+    status: official.status || OfficialStatus.ACTIVE,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -132,8 +132,8 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
                 onChange={handleChange}
                 className="flex h-8 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-slate-100"
               >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value={OfficialStatus.ACTIVE}>Active</option>
+                <option value={OfficialStatus.INACTIVE}>Inactive</option>
               </select>
             </div>
           </div>

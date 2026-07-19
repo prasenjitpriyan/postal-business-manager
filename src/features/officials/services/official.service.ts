@@ -70,7 +70,7 @@ export class OfficialService {
   }
 
   static async updateOfficial(id: string, data: Record<string, unknown>) {
-    const official = await Official.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    const official = await Official.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
     if (!official) throw new Error('Official not found');
     return official;
   }

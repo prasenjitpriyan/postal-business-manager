@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/useAuthStore'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { OfficialStatus } from '@/types/official'
 
 export function AddOfficialDialog() {
   const [open, setOpen] = useState(false)
@@ -22,7 +23,7 @@ export function AddOfficialDialog() {
     phone: '',
     email: '',
     joiningDate: new Date().toISOString().split('T')[0],
-    status: 'Active',
+    status: OfficialStatus.ACTIVE,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -60,7 +61,7 @@ export function AddOfficialDialog() {
         phone: '',
         email: '',
         joiningDate: new Date().toISOString().split('T')[0],
-        status: 'Active',
+        status: OfficialStatus.ACTIVE,
       })
       // Invalidate query to refetch data
       queryClient.invalidateQueries({ queryKey: ['officials'] })
@@ -180,8 +181,8 @@ export function AddOfficialDialog() {
                   onChange={handleChange}
                   className="flex h-8 w-full rounded-md border border-white/10 bg-slate-900/50 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-slate-100"
                 >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
+                  <option value={OfficialStatus.ACTIVE}>Active</option>
+                  <option value={OfficialStatus.INACTIVE}>Inactive</option>
                 </select>
               </div>
             </div>

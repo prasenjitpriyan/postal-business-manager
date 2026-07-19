@@ -148,7 +148,7 @@ export class ContributionService {
   }
 
   static async updateContribution(id: string, data: Record<string, unknown>) {
-    const contribution = await BusinessContribution.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    const contribution = await BusinessContribution.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
     if (!contribution) throw new Error('Contribution not found');
     return contribution;
   }
