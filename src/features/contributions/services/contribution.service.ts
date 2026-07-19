@@ -1,5 +1,6 @@
 import { BusinessContribution } from '@/models/BusinessContribution';
 import { GetContributionsQuery } from '@/types/contribution';
+import mongoose from 'mongoose';
 
 export class ContributionService {
   static async getContributions(queryOptions: GetContributionsQuery) {
@@ -9,6 +10,9 @@ export class ContributionService {
     const startDate = queryOptions.startDate;
     const endDate = queryOptions.endDate;
     const officialId = queryOptions.officialId;
+    const sortArray = queryOptions.sortArray && queryOptions.sortArray.length > 0 
+      ? queryOptions.sortArray 
+      : [{ id: 'officialId.name', desc: false }];
 
     const query: Record<string, unknown> = {};
     
@@ -26,16 +30,88 @@ export class ContributionService {
       if (endDate) (query.contributionDate as Record<string, unknown>).$lte = new Date(endDate);
     }
     
-    if (officialId) {
-      query.officialId = officialId;
+    if (officialId && mongoose.Types.ObjectId.isValid(officialId)) {
+      query.officialId = new mongoose.Types.ObjectId(officialId);
     }
 
-    const contributions = await BusinessContribution.find(query)
-      .populate('officialId', 'name designation')
-      .populate('createdBy', 'name')
-      .sort({ contributionDate: -1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    let contributions;
+    const hasOfficialSort = sortArray.some(s => s.id === 'officialId.name');
+
+    if (hasOfficialSort) {
+      const pipeline: mongoose.PipelineStage[] = [];
+      
+      if (Object.keys(query).length > 0) {
+        pipeline.push({ $match: query });
+      }
+
+      // MongoDB Collation for case-insensitive sort can be applied to the pipeline,
+      // but simpler is just to let MongoDB sort on the string directly. To do true case-insensitive
+      // sort, we'd need to use collation or `$toLower`. Let's stick to standard sort for now
+      // since collation requires passing options to the query.
+
+      pipeline.push(
+        {
+          $lookup: {
+            from: 'officials',
+            localField: 'officialId',
+            foreignField: '_id',
+            as: 'official'
+          }
+        },
+        { $unwind: { path: '$official', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'createdBy',
+            foreignField: '_id',
+            as: 'creator'
+          }
+        },
+        { $unwind: { path: '$creator', preserveNullAndEmptyArrays: true } }
+      );
+
+      // Build sort object
+      const sortObj: Record<string, 1 | -1> = {};
+      sortArray.forEach(s => {
+        const field = s.id === 'officialId.name' ? 'official.name' : s.id;
+        sortObj[field] = s.desc ? -1 : 1;
+      });
+      if (!sortObj.createdAt) sortObj.createdAt = -1;
+
+      pipeline.push({ $sort: sortObj });
+      pipeline.push({ $skip: (page - 1) * limit });
+      pipeline.push({ $limit: limit });
+      pipeline.push({
+        $addFields: {
+          officialId: {
+            _id: '$official._id',
+            name: '$official.name',
+            designation: '$official.designation'
+          },
+          createdBy: {
+            _id: '$creator._id',
+            name: '$creator.name'
+          }
+        }
+      });
+      pipeline.push({ $project: { official: 0, creator: 0 } });
+
+      contributions = await BusinessContribution.aggregate(pipeline).collation({ locale: 'en', strength: 2 });
+    } else {
+      const sortObj: Record<string, 1 | -1> = {};
+      sortArray.forEach(s => {
+        sortObj[s.id] = s.desc ? -1 : 1;
+      });
+      if (!sortObj.createdAt) sortObj.createdAt = -1;
+
+      contributions = await BusinessContribution.find(query)
+        .populate('officialId', 'name designation')
+        .populate('createdBy', 'name')
+        .collation({ locale: 'en', strength: 2 })
+        .sort(sortObj)
+        .skip((page - 1) * limit)
+        .limit(limit);
+    }
 
     const total = await BusinessContribution.countDocuments(query);
 

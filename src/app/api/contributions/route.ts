@@ -24,9 +24,18 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
     const officialId = searchParams.get('officialId') || undefined;
+    const sortParam = searchParams.get('sort');
+    let sortArray = [];
+    if (sortParam) {
+      try {
+        sortArray = JSON.parse(decodeURIComponent(sortParam));
+      } catch (e) {
+        // Fallback or ignore
+      }
+    }
 
     const data = await ContributionService.getContributions({ 
-      page, limit, search, startDate, endDate, officialId 
+      page, limit, search, startDate, endDate, officialId, sortArray
     });
     
     return successResponse(data);

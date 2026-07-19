@@ -24,4 +24,5 @@ export interface GetContributionsQuery {
   startDate?: string;
   endDate?: string;
   officialId?: string;
+  sortArray?: { id: string; desc: boolean }[];
 }

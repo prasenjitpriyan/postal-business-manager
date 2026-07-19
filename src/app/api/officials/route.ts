@@ -23,10 +23,17 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
-    const sortField = searchParams.get('sortField') || 'name';
-    const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
-
-    const data = await OfficialService.getOfficials({ page, limit, search, status, sortField, sortOrder });
+    const sortParam = searchParams.get('sort')
+    let sortArray = []
+    if (sortParam) {
+      try {
+        sortArray = JSON.parse(decodeURIComponent(sortParam))
+      } catch (e) {
+        // Ignored
+      }
+    }
+    
+    const data = await OfficialService.getOfficials({ page, limit, search, status, sortArray });
     return successResponse(data);
 
   } catch (error: unknown) {

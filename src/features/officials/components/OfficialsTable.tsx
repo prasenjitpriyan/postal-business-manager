@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table'
 import { Official, OfficialStatus } from '@/types/official'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import {
   ColumnDef,
   flexRender,
@@ -32,18 +32,17 @@ export function OfficialsTable() {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
 
   // Use React Query for fetching
-  const fetchOfficials = async (page: number, search: string, sortField: string, sortOrder: string) => {
-    const res = await fetch(`/api/officials?page=${page}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}`)
+  const fetchOfficials = async (page: number, search: string, sortParams: string) => {
+    const res = await fetch(`/api/officials?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`)
     if (!res.ok) throw new Error('Network response was not ok')
     return res.json()
   }
 
-  const sortField = sorting.length > 0 ? sorting[0].id : 'name';
-  const sortOrder = sorting.length > 0 && sorting[0].desc ? 'desc' : 'asc';
+  const sortParams = JSON.stringify(sorting)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['officials', page, search, sortField, sortOrder],
-    queryFn: () => fetchOfficials(page, search, sortField, sortOrder),
+    queryKey: ['officials', page, search, sortParams],
+    queryFn: () => fetchOfficials(page, search, sortParams),
   })
 
   const columns: ColumnDef<Official>[] = [
@@ -53,27 +52,84 @@ export function OfficialsTable() {
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
             className="-ml-4 hover:bg-white/5 hover:text-white"
           >
             Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
           </Button>
         )
       },
     },
     {
       accessorKey: 'employeeId',
-      header: 'Employee ID',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Employee ID
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        )
+      },
       cell: ({ row }) => row.getValue('employeeId') || '-',
     },
     {
       accessorKey: 'designation',
-      header: 'Designation',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Designation
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        )
+      },
     },
     {
       accessorKey: 'office',
-      header: 'Office',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Office
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        )
+      },
     },
     {
       accessorKey: 'phone',
@@ -111,6 +167,7 @@ export function OfficialsTable() {
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     manualSorting: true,
+    enableMultiSort: true,
     state: {
       sorting,
     },

@@ -8,6 +8,7 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
+  SortingState,
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BusinessContribution } from '@/types/contribution';
 import { AddContributionDialog } from './AddContributionDialog';
 import { EditContributionDialog } from './EditContributionDialog';
@@ -31,10 +33,10 @@ export function ContributionsTable() {
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'officialId.name', desc: false }]);
 
-  // Use React Query for fetching
-  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
-    let url = `/api/contributions?page=${page}&search=${search}`;
+  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string, sortParams: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
+    let url = `/api/contributions?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
 
@@ -43,30 +45,100 @@ export function ContributionsTable() {
     return res.json();
   };
 
+  const sortParams = JSON.stringify(sorting);
+
   const { data, isLoading } = useQuery({
-    queryKey: ['contributions', page, search, startDate, endDate],
-    queryFn: () => fetchContributions(page, search, startDate, endDate),
+    queryKey: ['contributions', page, search, startDate, endDate, sortParams],
+    queryFn: () => fetchContributions(page, search, startDate, endDate, sortParams),
     placeholderData: keepPreviousData,
   });
 
   const columns: ColumnDef<BusinessContribution>[] = [
     {
       accessorKey: 'contributionDate',
-      header: 'Date',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Date
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => new Date(row.getValue('contributionDate')).toLocaleDateString(),
     },
     {
       accessorKey: 'officialId.name',
-      header: 'Official',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Official
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        );
+      },
       cell: ({ row }) => (row.original.officialId as { name?: string })?.name || 'Unknown',
     },
     {
       accessorKey: 'contributeOffice',
-      header: 'Office',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Office
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        );
+      },
     },
     {
       accessorKey: 'accountType',
-      header: 'Type',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Type
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        );
+      },
     },
     {
       accessorKey: 'accountsOpened',
@@ -91,6 +163,12 @@ export function ContributionsTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    manualSorting: true,
+    enableMultiSort: true,
+    state: {
+      sorting,
+    },
   });
 
   return (

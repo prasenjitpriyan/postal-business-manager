@@ -5,8 +5,7 @@ export interface GetOfficialsQuery {
   limit?: number;
   search?: string;
   status?: string;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortArray?: { id: string; desc: boolean }[];
 }
 
 export class OfficialService {
@@ -15,8 +14,9 @@ export class OfficialService {
     const limit = queryOptions.limit || 10;
     const search = queryOptions.search || '';
     const status = queryOptions.status || '';
-    const sortField = queryOptions.sortField || 'name'; // Default A-Z
-    const sortOrder = queryOptions.sortOrder || 'asc';
+    const sortArray = queryOptions.sortArray && queryOptions.sortArray.length > 0 
+      ? queryOptions.sortArray 
+      : [{ id: 'name', desc: false }];
 
     const query: Record<string, unknown> = {};
     
@@ -34,11 +34,14 @@ export class OfficialService {
       query.status = status;
     }
 
-    const sortOptions: Record<string, 1 | -1> = {
-      [sortField]: sortOrder === 'desc' ? -1 : 1
-    };
+    const sortOptions: Record<string, 1 | -1> = {};
+    sortArray.forEach(s => {
+      sortOptions[s.id] = s.desc ? -1 : 1;
+    });
+    if (!sortOptions.createdAt) sortOptions.createdAt = -1;
 
     const officials = await Official.find(query)
+      .collation({ locale: 'en', strength: 2 })
       .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(limit);
