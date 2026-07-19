@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
   ColumnDef,
   flexRender,
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/table';
 import { BusinessContribution } from '@/types/contribution';
 import { AddContributionDialog } from './AddContributionDialog';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+
 
 export function ContributionsTable() {
   const [page, setPage] = useState(1);
@@ -31,7 +31,7 @@ export function ContributionsTable() {
   const [endDate, setEndDate] = useState('');
   
   // Use React Query for fetching
-  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string): Promise<any> => {
+  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
     let url = `/api/contributions?page=${page}&search=${search}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
@@ -87,7 +87,6 @@ export function ContributionsTable() {
     },
   ];
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data?.data?.contributions || [],
     columns,
