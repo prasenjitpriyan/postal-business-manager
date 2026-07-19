@@ -4,9 +4,24 @@ import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Zap, Users, MapPin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function DashboardPage() {
   const container = useRef<HTMLDivElement>(null);
+
+  const fetchStats = async () => {
+    const res = await fetch('/api/dashboard/stats');
+    if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+    return res.json();
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: fetchStats,
+  });
+
+  const stats = data?.data || { totalContributions: '--', totalOfficials: '--', topOffice: '--' };
+
 
   useGSAP(() => {
     const tl = gsap.timeline();
@@ -52,7 +67,9 @@ export default function DashboardPage() {
             <Zap className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
           </div>
           <h3 className="font-semibold text-slate-300 text-lg">Total Contributions</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">--</p>
+          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
+            {isLoading ? '--' : stats.totalContributions}
+          </p>
         </div>
 
         <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-sm shadow-lg hover:bg-white/[0.07] transition-all hover:-translate-y-2 group relative overflow-hidden">
@@ -61,7 +78,9 @@ export default function DashboardPage() {
             <Users className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
           </div>
           <h3 className="font-semibold text-slate-300 text-lg">Total Officials</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">--</p>
+          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
+            {isLoading ? '--' : stats.totalOfficials}
+          </p>
         </div>
 
         <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-sm shadow-lg hover:bg-white/[0.07] transition-all hover:-translate-y-2 group relative overflow-hidden">
@@ -70,7 +89,9 @@ export default function DashboardPage() {
             <MapPin className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
           </div>
           <h3 className="font-semibold text-slate-300 text-lg">Top Office</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">--</p>
+          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
+            {isLoading ? '--' : stats.topOffice}
+          </p>
         </div>
       </div>
     </div>

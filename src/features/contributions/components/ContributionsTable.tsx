@@ -30,13 +30,13 @@ export function ContributionsTable() {
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  
+
   // Use React Query for fetching
   const fetchContributions = async (page: number, search: string, startDate: string, endDate: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
     let url = `/api/contributions?page=${page}&search=${search}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
-    
+
     const res = await fetch(url);
     if (!res.ok) throw new Error('Network response was not ok');
     return res.json();
@@ -88,6 +88,7 @@ export function ContributionsTable() {
     },
   ];
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data?.data?.contributions || [],
     columns,
@@ -124,7 +125,7 @@ export function ContributionsTable() {
         </div>
         <AddContributionDialog />
       </div>
-      
+
       <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
         <Table>
           <TableHeader>
@@ -170,7 +171,7 @@ export function ContributionsTable() {
           </TableBody>
         </Table>
       </div>
-      
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
