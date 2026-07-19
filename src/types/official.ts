@@ -10,6 +10,7 @@ export interface Official {
   designation: string;
   office: string;
   email?: string;
+  employeeId?: string;
   joiningDate?: string;
   status: OfficialStatus;
   createdAt: string;

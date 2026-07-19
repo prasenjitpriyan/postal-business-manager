@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Document, Model, Schema } from 'mongoose'
 
 export enum OfficialStatus {
   ACTIVE = 'Active',
@@ -6,15 +6,16 @@ export enum OfficialStatus {
 }
 
 export interface IOfficial extends Document {
-  name: string;
-  designation: string;
-  office: string; // Office Name
-  phone: string;
-  email?: string;
-  status: OfficialStatus;
-  joiningDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string
+  designation: string
+  office: string
+  phone: string
+  email?: string
+  employeeId?: string
+  status: OfficialStatus
+  joiningDate: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 const OfficialSchema: Schema = new Schema(
@@ -24,10 +25,15 @@ const OfficialSchema: Schema = new Schema(
     office: { type: String, required: true },
     phone: { type: String, required: true },
     email: { type: String },
+    employeeId: { type: String },
     status: { type: String, enum: Object.values(OfficialStatus), default: OfficialStatus.ACTIVE },
     joiningDate: { type: Date, required: true },
   },
   { timestamps: true }
-);
+)
 
-export const Official: Model<IOfficial> = mongoose.models.Official || mongoose.model<IOfficial>('Official', OfficialSchema);
+// Clear mongoose model cache for hot reload in development
+if (mongoose.models.Official) {
+  delete mongoose.models.Official
+}
+export const Official: Model<IOfficial> = mongoose.model<IOfficial>('Official', OfficialSchema)

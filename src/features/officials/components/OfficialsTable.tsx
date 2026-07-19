@@ -12,12 +12,14 @@ import {
 } from '@/components/ui/table'
 import { Official, OfficialStatus } from '@/types/official'
 import { useQuery } from '@tanstack/react-query'
+import { ArrowUpDown } from 'lucide-react'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
+  SortingState,
 } from '@tanstack/react-table'
 import { useState } from 'react'
 import { AddOfficialDialog } from './AddOfficialDialog'
@@ -27,23 +29,43 @@ import { EditOfficialDialog } from './EditOfficialDialog'
 export function OfficialsTable() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
 
   // Use React Query for fetching
-  const fetchOfficials = async (page: number, search: string) => {
-    const res = await fetch(`/api/officials?page=${page}&search=${search}`)
+  const fetchOfficials = async (page: number, search: string, sortField: string, sortOrder: string) => {
+    const res = await fetch(`/api/officials?page=${page}&search=${search}&sortField=${sortField}&sortOrder=${sortOrder}`)
     if (!res.ok) throw new Error('Network response was not ok')
     return res.json()
   }
 
+  const sortField = sorting.length > 0 ? sorting[0].id : 'name';
+  const sortOrder = sorting.length > 0 && sorting[0].desc ? 'desc' : 'asc';
+
   const { data, isLoading } = useQuery({
-    queryKey: ['officials', page, search],
-    queryFn: () => fetchOfficials(page, search),
+    queryKey: ['officials', page, search, sortField, sortOrder],
+    queryFn: () => fetchOfficials(page, search, sortField, sortOrder),
   })
 
   const columns: ColumnDef<Official>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+    },
+    {
+      accessorKey: 'employeeId',
+      header: 'Employee ID',
+      cell: ({ row }) => row.getValue('employeeId') || '-',
     },
     {
       accessorKey: 'designation',
@@ -87,6 +109,11 @@ export function OfficialsTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    manualSorting: true,
+    state: {
+      sorting,
+    },
   })
 
   return (

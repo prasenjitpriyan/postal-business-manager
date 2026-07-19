@@ -29,6 +29,7 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
     name: official.name || '',
     designation: official.designation || '',
     office: official.office || '',
+    employeeId: official.employeeId || '',
     phone: official.phone || '',
     email: official.email || '',
     joiningDate: official.joiningDate ? new Date(official.joiningDate).toISOString().split('T')[0] : '',
@@ -102,6 +103,10 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
               <label htmlFor="office" className="text-sm font-medium">Office *</label>
               <Input id="office" name="office" required value={formData.office} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" />
             </div>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="employeeId" className="text-sm font-medium">Employee ID</label>
+            <Input id="employeeId" name="employeeId" value={formData.employeeId} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">

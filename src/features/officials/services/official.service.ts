@@ -5,6 +5,8 @@ export interface GetOfficialsQuery {
   limit?: number;
   search?: string;
   status?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export class OfficialService {
@@ -13,6 +15,8 @@ export class OfficialService {
     const limit = queryOptions.limit || 10;
     const search = queryOptions.search || '';
     const status = queryOptions.status || '';
+    const sortField = queryOptions.sortField || 'name'; // Default A-Z
+    const sortOrder = queryOptions.sortOrder || 'asc';
 
     const query: Record<string, unknown> = {};
     
@@ -22,6 +26,7 @@ export class OfficialService {
         { phone: { $regex: search, $options: 'i' } },
         { designation: { $regex: search, $options: 'i' } },
         { office: { $regex: search, $options: 'i' } },
+        { employeeId: { $regex: search, $options: 'i' } },
       ];
     }
     
@@ -29,8 +34,12 @@ export class OfficialService {
       query.status = status;
     }
 
+    const sortOptions: Record<string, 1 | -1> = {
+      [sortField]: sortOrder === 'desc' ? -1 : 1
+    };
+
     const officials = await Official.find(query)
-      .sort({ createdAt: -1 })
+      .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(limit);
 

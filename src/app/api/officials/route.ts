@@ -23,8 +23,10 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
+    const sortField = searchParams.get('sortField') || 'name';
+    const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
 
-    const data = await OfficialService.getOfficials({ page, limit, search, status });
+    const data = await OfficialService.getOfficials({ page, limit, search, status, sortField, sortOrder });
     return successResponse(data);
 
   } catch (error: unknown) {

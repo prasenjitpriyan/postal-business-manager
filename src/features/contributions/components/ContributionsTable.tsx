@@ -11,7 +11,6 @@ import {
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -22,6 +21,8 @@ import {
 } from '@/components/ui/table';
 import { BusinessContribution } from '@/types/contribution';
 import { AddContributionDialog } from './AddContributionDialog';
+import { EditContributionDialog } from './EditContributionDialog';
+import { DeleteContributionDialog } from './DeleteContributionDialog';
 
 
 export function ContributionsTable() {
@@ -73,15 +74,11 @@ export function ContributionsTable() {
     },
     {
       id: 'actions',
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors h-8 w-8" title="Edit Contribution">
-              <Pencil className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors h-8 w-8" title="Delete Contribution">
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            <EditContributionDialog contribution={row.original} />
+            <DeleteContributionDialog contributionId={row.original._id} />
           </div>
         );
       },
