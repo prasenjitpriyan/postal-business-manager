@@ -1,9 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 
-export enum OfficialStatus {
-  ACTIVE = 'Active',
-  INACTIVE = 'Inactive',
-}
+import { OfficialStatus } from '@/types/official'
 
 export interface IOfficial extends Document {
   name: string

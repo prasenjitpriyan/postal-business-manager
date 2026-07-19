@@ -8,13 +8,13 @@ import { Role } from '@/models/User';
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
-    
+
     // Auth Check
     const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1] || req.cookies.get('token')?.value;
-    
+
     if (!token) return errorResponse('Unauthorized', 401);
-    
+
     const session = await verifyToken(token);
     if (!session) return errorResponse('Unauthorized', 401);
 
@@ -28,11 +28,12 @@ export async function GET(req: NextRequest) {
     if (sortParam) {
       try {
         sortArray = JSON.parse(decodeURIComponent(sortParam))
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         // Ignored
       }
     }
-    
+
     const data = await OfficialService.getOfficials({ page, limit, search, status, sortArray });
     return successResponse(data);
 
@@ -44,12 +45,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    
+
     const authHeader = req.headers.get('Authorization');
     const token = authHeader?.split(' ')[1] || req.cookies.get('token')?.value;
-    
+
     if (!token) return errorResponse('Unauthorized', 401);
-    
+
     const session = await verifyToken(token);
     if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPERVISOR)) {
       return errorResponse('Forbidden', 403);

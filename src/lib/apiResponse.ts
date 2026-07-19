@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server';
 
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: string;
-}
-
 export function successResponse<T>(data: T, message?: string, status = 200) {
   return NextResponse.json(
     {

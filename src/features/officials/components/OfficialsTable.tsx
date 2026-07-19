@@ -25,11 +25,15 @@ import { useState } from 'react'
 import { AddOfficialDialog } from './AddOfficialDialog'
 import { DeleteOfficialDialog } from './DeleteOfficialDialog'
 import { EditOfficialDialog } from './EditOfficialDialog'
+import { useRef } from 'react'
+import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export function OfficialsTable() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
+  const tableContainerRef = useRef<HTMLDivElement>(null)
 
   // Use React Query for fetching
   const fetchOfficials = async (page: number, search: string, sortParams: string) => {
@@ -44,6 +48,16 @@ export function OfficialsTable() {
     queryKey: ['officials', page, search, sortParams],
     queryFn: () => fetchOfficials(page, search, sortParams),
   })
+
+  useGSAP(() => {
+    if (!isLoading && data?.data?.officials) {
+      gsap.fromTo(
+        '.gsap-table-row',
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+      )
+    }
+  }, [data, isLoading])
 
   const columns: ColumnDef<Official>[] = [
     {
@@ -185,7 +199,7 @@ export function OfficialsTable() {
         <AddOfficialDialog />
       </div>
 
-      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
+      <div ref={tableContainerRef} className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -209,7 +223,7 @@ export function OfficialsTable() {
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="gsap-table-row opacity-0">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

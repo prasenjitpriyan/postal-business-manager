@@ -25,6 +25,9 @@ import { BusinessContribution } from '@/types/contribution';
 import { AddContributionDialog } from './AddContributionDialog';
 import { EditContributionDialog } from './EditContributionDialog';
 import { DeleteContributionDialog } from './DeleteContributionDialog';
+import { useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 
 export function ContributionsTable() {
@@ -34,6 +37,7 @@ export function ContributionsTable() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [sorting, setSorting] = useState<SortingState>([{ id: 'officialId.name', desc: false }]);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchContributions = async (page: number, search: string, startDate: string, endDate: string, sortParams: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
     let url = `/api/contributions?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`;
@@ -52,6 +56,16 @@ export function ContributionsTable() {
     queryFn: () => fetchContributions(page, search, startDate, endDate, sortParams),
     placeholderData: keepPreviousData,
   });
+
+  useGSAP(() => {
+    if (!isLoading && data?.data?.contributions) {
+      gsap.fromTo(
+        '.gsap-table-row',
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+      );
+    }
+  }, [data, isLoading]);
 
   const columns: ColumnDef<BusinessContribution>[] = [
     {
@@ -201,7 +215,7 @@ export function ContributionsTable() {
         <AddContributionDialog />
       </div>
 
-      <div className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
+      <div ref={tableContainerRef} className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -228,7 +242,7 @@ export function ContributionsTable() {
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="gsap-table-row opacity-0">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
