@@ -25,6 +25,7 @@ import { AddContributionDialog } from './AddContributionDialog';
 
 
 export function ContributionsTable() {
+  'use no memo';
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
