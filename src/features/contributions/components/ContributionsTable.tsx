@@ -22,20 +22,29 @@ import {
 } from '@/components/ui/table';
 import { BusinessContribution } from '@/types/contribution';
 import { AddContributionDialog } from './AddContributionDialog';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 
 export function ContributionsTable() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   
-  const fetchContributions = async (page: number, search: string) => {
-    const res = await fetch(`/api/contributions?page=${page}&search=${search}`);
+  // Use React Query for fetching
+  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string): Promise<any> => {
+    let url = `/api/contributions?page=${page}&search=${search}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
+    
+    const res = await fetch(url);
     if (!res.ok) throw new Error('Network response was not ok');
     return res.json();
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ['contributions', page, search],
-    queryFn: () => fetchContributions(page, search),
+    queryKey: ['contributions', page, search, startDate, endDate],
+    queryFn: () => fetchContributions(page, search, startDate, endDate),
+    placeholderData: keepPreviousData,
   });
 
   const columns: ColumnDef<BusinessContribution>[] = [
@@ -89,12 +98,30 @@ export function ContributionsTable() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Input
-          placeholder="Search contributions..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:max-w-sm"
-        />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Input
+            placeholder="Search contributions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-60"
+          />
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-36 text-sm bg-slate-950/50 border-white/10 text-slate-100 scheme-dark"
+              title="Start Date"
+            />
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full sm:w-36 text-sm bg-slate-950/50 border-white/10 text-slate-100 scheme-dark"
+              title="End Date"
+            />
+          </div>
+        </div>
         <AddContributionDialog />
       </div>
       
