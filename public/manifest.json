@@ -1,0 +1,16 @@
+{
+  "name": "Postal Business Manager",
+  "short_name": "Postal Manager",
+  "description": "The advanced, all-in-one management system designed to track postal officials and oversee business contributions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
