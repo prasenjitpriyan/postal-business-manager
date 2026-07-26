@@ -49,15 +49,21 @@ export function OfficialsTable() {
     queryFn: () => fetchOfficials(page, search, sortParams),
   })
 
-  useGSAP(() => {
-    if (!isLoading && data?.data?.officials) {
-      gsap.fromTo(
-        '.gsap-table-row',
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
-      )
-    }
-  }, [data, isLoading])
+  useGSAP(
+    () => {
+      if (!isLoading && data?.data?.officials && data.data.officials.length > 0) {
+        const rows = tableContainerRef.current?.querySelectorAll('.gsap-table-row')
+        if (rows && rows.length > 0) {
+          gsap.fromTo(
+            rows,
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+          )
+        }
+      }
+    },
+    { scope: tableContainerRef, dependencies: [data, isLoading] }
+  )
 
   const columns: ColumnDef<Official>[] = [
     {
