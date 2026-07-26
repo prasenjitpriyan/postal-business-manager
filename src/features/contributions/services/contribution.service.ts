@@ -1,4 +1,5 @@
 import { BusinessContribution } from '@/models/BusinessContribution';
+import { Official } from '@/models/Official';
 import { GetContributionsQuery } from '@/types/contribution';
 import mongoose from 'mongoose';
 
@@ -17,17 +18,30 @@ export class ContributionService {
     const query: Record<string, unknown> = {};
     
     if (search) {
+      const matchingOfficials = await Official.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { designation: { $regex: search, $options: 'i' } },
+        ],
+      }).select('_id');
+      const officialIds = matchingOfficials.map(o => o._id);
+
       query.$or = [
         { contributeOffice: { $regex: search, $options: 'i' } },
         { accountType: { $regex: search, $options: 'i' } },
         { remarks: { $regex: search, $options: 'i' } },
+        ...(officialIds.length > 0 ? [{ officialId: { $in: officialIds } }] : []),
       ];
     }
     
     if (startDate || endDate) {
       query.contributionDate = {};
       if (startDate) (query.contributionDate as Record<string, unknown>).$gte = new Date(startDate);
-      if (endDate) (query.contributionDate as Record<string, unknown>).$lte = new Date(endDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        (query.contributionDate as Record<string, unknown>).$lte = end;
+      }
     }
     
     if (officialId && mongoose.Types.ObjectId.isValid(officialId)) {

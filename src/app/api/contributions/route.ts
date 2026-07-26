@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     if (sortParam) {
       try {
         sortArray = JSON.parse(decodeURIComponent(sortParam));
-      } catch (e) {
+      } catch {
         // Fallback or ignore
       }
     }

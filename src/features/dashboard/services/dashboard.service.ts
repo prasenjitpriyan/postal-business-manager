@@ -8,8 +8,8 @@ export class DashboardService {
       const totalOfficials = await Official.countDocuments();
 
       const topOfficeResult = await BusinessContribution.aggregate([
-        { $group: { _id: '$contributeOffice', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
+        { $group: { _id: '$contributeOffice', totalAccounts: { $sum: '$accountsOpened' } } },
+        { $sort: { totalAccounts: -1 } },
         { $limit: 1 }
       ]);
 
