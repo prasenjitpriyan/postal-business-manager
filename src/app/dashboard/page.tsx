@@ -3,8 +3,10 @@
 import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Zap, Users, MapPin } from 'lucide-react';
+import { Zap, Users, MapPin, TrendingUp, Plus, BarChart2, ArrowRight, Award, Clock, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
   const container = useRef<HTMLDivElement>(null);
@@ -20,28 +22,37 @@ export default function DashboardPage() {
     queryFn: fetchStats,
   });
 
-  const stats = data?.data || { totalContributions: '--', totalOfficials: '--', topOffice: '--' };
-
+  const stats = data?.data || { 
+    totalContributions: 0, 
+    totalAccountsOpened: 0, 
+    totalOfficials: 0, 
+    topOffice: '--',
+    recentActivity: [],
+    topOfficials: [],
+    accountsByType: []
+  };
 
   useGSAP(() => {
     const tl = gsap.timeline();
 
-    // Staggered reveal for the header
     tl.fromTo('.dash-header-text', 
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+      { y: 25, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out' }
     )
-    // Staggered 3D-like reveal for metric cards
     .fromTo('.dash-metric-card',
-      { y: 50, opacity: 0, rotateX: -15, transformOrigin: "50% 100%" },
-      { y: 0, opacity: 1, rotateX: 0, duration: 0.7, stagger: 0.15, ease: 'back.out(1.5)' },
+      { y: 40, opacity: 0, rotateX: -10, transformOrigin: "50% 100%" },
+      { y: 0, opacity: 1, rotateX: 0, duration: 0.6, stagger: 0.1, ease: 'back.out(1.4)' },
+      '-=0.2'
+    )
+    .fromTo('.dash-widget',
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.12, ease: 'power2.out' },
       '-=0.3'
     );
 
-    // Continuous floating/pulse for icons inside cards
     gsap.to('.dash-icon-bg', {
       scale: 1.05,
-      duration: 2,
+      duration: 2.5,
       repeat: -1,
       yoyo: true,
       ease: 'sine.inOut'
@@ -51,47 +62,242 @@ export default function DashboardPage() {
 
   return (
     <div ref={container} className="space-y-8">
-      <div>
-        <h1 className="dash-header-text text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
-          Dashboard Overview
-        </h1>
-        <p className="dash-header-text text-slate-400">
-          Welcome back to the Business Contribution Management System.
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-sm shadow-lg hover:bg-white/[0.07] transition-all hover:-translate-y-2 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="dash-icon-bg w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 border border-blue-500/20">
-            <Zap className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
-          </div>
-          <h3 className="font-semibold text-slate-300 text-lg">Total Contributions</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
-            {isLoading ? '--' : stats.totalContributions}
+      {/* Header & Quick Action Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="dash-header-text text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-1">
+            Dashboard Overview
+          </h1>
+          <p className="dash-header-text text-slate-400 text-sm md:text-base">
+            Welcome back to the Business Contribution Management System.
           </p>
         </div>
 
-        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-sm shadow-lg hover:bg-white/[0.07] transition-all hover:-translate-y-2 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="dash-icon-bg w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-500/20">
-            <Users className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+        <div className="dash-header-text flex flex-wrap items-center gap-3">
+          <Link href="/dashboard/contributions">
+            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md shadow-indigo-600/20">
+              <Plus className="w-4 h-4 mr-1.5" /> Add Contribution
+            </Button>
+          </Link>
+          <Link href="/dashboard/officials">
+            <Button size="sm" variant="outline" className="border-white/15 bg-white/5 hover:bg-white/10 text-slate-200">
+              <Plus className="w-4 h-4 mr-1.5" /> Add Official
+            </Button>
+          </Link>
+          <Link href="/dashboard/reports">
+            <Button size="sm" variant="ghost" className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10">
+              <BarChart2 className="w-4 h-4 mr-1.5" /> Reports <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* KPI Cards Row */}
+      <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Total Accounts */}
+        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm shadow-lg hover:bg-white/8 transition-all hover:-translate-y-1.5 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="dash-icon-bg w-11 h-11 rounded-2xl bg-emerald-500/20 flex items-center justify-center mb-4 border border-emerald-500/20">
+            <TrendingUp className="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
           </div>
-          <h3 className="font-semibold text-slate-300 text-lg">Total Officials</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Accounts</span>
+          <p className="mt-1 text-3xl font-extrabold text-white tracking-tight">
+            {isLoading ? '--' : (stats.totalAccountsOpened || 0).toLocaleString()}
+          </p>
+        </div>
+
+        {/* Card 2: Total Contributions */}
+        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm shadow-lg hover:bg-white/8 transition-all hover:-translate-y-1.5 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="dash-icon-bg w-11 h-11 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-500/20">
+            <Zap className="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors" />
+          </div>
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Entries</span>
+          <p className="mt-1 text-3xl font-extrabold text-white tracking-tight">
+            {isLoading ? '--' : (stats.totalContributions || 0).toLocaleString()}
+          </p>
+        </div>
+
+        {/* Card 3: Total Officials */}
+        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm shadow-lg hover:bg-white/8 transition-all hover:-translate-y-1.5 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="dash-icon-bg w-11 h-11 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-4 border border-indigo-500/20">
+            <Users className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+          </div>
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Officials</span>
+          <p className="mt-1 text-3xl font-extrabold text-white tracking-tight">
             {isLoading ? '--' : stats.totalOfficials}
           </p>
         </div>
 
-        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-sm shadow-lg hover:bg-white/[0.07] transition-all hover:-translate-y-2 group relative overflow-hidden">
+        {/* Card 4: Top Office */}
+        <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm shadow-lg hover:bg-white/8 transition-all hover:-translate-y-1.5 group relative overflow-hidden">
           <div className="absolute inset-0 bg-linear-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="dash-icon-bg w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6 border border-purple-500/20">
-            <MapPin className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
+          <div className="dash-icon-bg w-11 h-11 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4 border border-purple-500/20">
+            <MapPin className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" />
           </div>
-          <h3 className="font-semibold text-slate-300 text-lg">Top Office</h3>
-          <p className="mt-2 text-4xl font-bold text-white tracking-tight">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Top Office</span>
+          <p className="mt-1 text-xl font-bold text-white tracking-tight truncate w-full">
             {isLoading ? '--' : stats.topOffice}
           </p>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 Columns: Recent Activity & Product Breakdown */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Recent Activity Widget */}
+          <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-indigo-400" />
+                <h3 className="font-semibold text-white text-lg">Recent Business Activity</h3>
+              </div>
+              <Link href="/dashboard/contributions" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center font-medium">
+                View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 text-slate-400 font-medium">
+                    <th className="pb-3 pr-4">Date</th>
+                    <th className="pb-3 px-4">Official</th>
+                    <th className="pb-3 px-4">Office</th>
+                    <th className="pb-3 px-4">Product</th>
+                    <th className="pb-3 pl-4 text-right">Accounts</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-slate-500">Loading activity...</td>
+                    </tr>
+                  ) : !stats.recentActivity || stats.recentActivity.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-slate-500">No recent activity logged.</td>
+                    </tr>
+                  ) : (
+                    stats.recentActivity.map((item: { _id?: string; contributionDate?: string; officialId?: { name?: string; office?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }, idx: number) => (
+                      <tr key={item._id || `act-${idx}`} className="hover:bg-white/3 transition-colors">
+                        <td className="py-3 pr-4 text-slate-300 font-mono">
+                          {item.contributionDate ? new Date(item.contributionDate).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td className="py-3 px-4 text-white font-medium">
+                          {item.officialId?.name || 'Unknown'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-400">
+                          {item.contributeOffice || item.officialId?.office || 'N/A'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            {item.accountType || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 pl-4 text-right font-bold text-emerald-400">
+                          +{item.accountsOpened || 0}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Account Types Breakdown Widget */}
+          <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <h3 className="font-semibold text-white text-lg mb-4">Account Product Distribution</h3>
+            {isLoading ? (
+              <p className="text-xs text-slate-500">Loading breakdown...</p>
+            ) : !stats.accountsByType || stats.accountsByType.length === 0 ? (
+              <p className="text-xs text-slate-500">No account type data available.</p>
+            ) : (
+              <div className="space-y-3">
+                {stats.accountsByType.map((item: { type: string; count: number }, idx: number) => {
+                  const percentage = stats.totalAccountsOpened > 0 
+                    ? Math.round((item.count / stats.totalAccountsOpened) * 100) 
+                    : 0;
+                  return (
+                    <div key={`type-${idx}`} className="space-y-1">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="text-slate-200">{item.type}</span>
+                        <span className="text-slate-400">{item.count.toLocaleString()} accounts ({percentage}%)</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-linear-to-r from-indigo-500 to-sky-400 h-full rounded-full transition-all duration-500" 
+                          style={{ width: `${Math.min(100, Math.max(5, percentage))}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right 1 Column: Top Officials Leaderboard */}
+        <div className="space-y-6">
+          {/* Top Officials Leaderboard */}
+          <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-400" />
+                <h3 className="font-semibold text-white text-lg">Top Performers</h3>
+              </div>
+              <Link href="/dashboard/officials" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center">
+                View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              </Link>
+            </div>
+
+            {isLoading ? (
+              <p className="text-xs text-slate-500 py-4">Loading top performers...</p>
+            ) : !stats.topOfficials || stats.topOfficials.length === 0 ? (
+              <p className="text-xs text-slate-500 py-4">No performer records available.</p>
+            ) : (
+              <div className="space-y-3">
+                {stats.topOfficials.map((off: { id?: string; name?: string; office?: string; designation?: string; totalAccounts?: number }, idx: number) => (
+                  <div key={off.id || `off-${idx}`} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                        idx === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                        idx === 1 ? 'bg-slate-300/20 text-slate-200 border border-slate-300/30' :
+                        idx === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' :
+                        'bg-slate-800 text-slate-400'
+                      }`}>
+                        #{idx + 1}
+                      </div>
+                      <div className="overflow-hidden">
+                        <p className="text-xs font-semibold text-white truncate">{off.name || 'Unknown'}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{off.designation || off.office || 'Official'}</p>
+                      </div>
+                    </div>
+                    <div className="text-right pl-2">
+                      <span className="text-xs font-bold text-emerald-400">{off.totalAccounts || 0}</span>
+                      <p className="text-[10px] text-slate-500">opened</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Quick Info & Help Card */}
+          <div className="dash-widget bg-linear-to-br from-indigo-950/40 to-slate-950/60 border border-indigo-500/20 rounded-3xl p-6 backdrop-blur-md">
+            <h4 className="font-semibold text-indigo-300 text-sm mb-2">Management Quick Tip</h4>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Regularly record business contributions for officials to track monthly quota achievements and generate accurate analytics reports.
+            </p>
+            <Link href="/dashboard/reports">
+              <Button size="sm" variant="outline" className="w-full border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 text-xs">
+                Explore Analytics Reports
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

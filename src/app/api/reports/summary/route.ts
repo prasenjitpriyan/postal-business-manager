@@ -17,7 +17,11 @@ export async function GET(req: NextRequest) {
     const session = await verifyToken(token);
     if (!session) return errorResponse('Unauthorized', 401);
 
-    const summary = await ReportService.getDashboardSummary();
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
+
+    const summary = await ReportService.getDashboardSummary(startDate, endDate);
     return successResponse(summary);
 
   } catch (error: unknown) {
