@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key';
@@ -26,3 +27,12 @@ export async function verifyToken(token: string): Promise<SessionPayload | null>
     return null;
   }
 }
+
+export async function getAuthSession(req: NextRequest): Promise<SessionPayload | null> {
+  const authHeader = req.headers.get('Authorization');
+  const token = authHeader?.split(' ')[1] || req.cookies.get('token')?.value;
+
+  if (!token) return null;
+  return await verifyToken(token);
+}
+

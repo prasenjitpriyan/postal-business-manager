@@ -2,20 +2,14 @@ import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { OfficialService } from '@/features/officials/services/official.service';
 import { successResponse, errorResponse } from '@/lib/apiResponse';
-import { verifyToken } from '@/lib/auth';
+import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
 
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Auth Check
-    const authHeader = req.headers.get('Authorization');
-    const token = authHeader?.split(' ')[1] || req.cookies.get('token')?.value;
-
-    if (!token) return errorResponse('Unauthorized', 401);
-
-    const session = await verifyToken(token);
+    const session = await getAuthSession(req);
     if (!session) return errorResponse('Unauthorized', 401);
 
     const { searchParams } = new URL(req.url);
@@ -23,11 +17,11 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
-    const sortParam = searchParams.get('sort')
-    let sortArray = []
+    const sortParam = searchParams.get('sort');
+    let sortArray = [];
     if (sortParam) {
       try {
-        sortArray = JSON.parse(decodeURIComponent(sortParam))
+        sortArray = JSON.parse(decodeURIComponent(sortParam));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         // Ignored
@@ -46,12 +40,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const authHeader = req.headers.get('Authorization');
-    const token = authHeader?.split(' ')[1] || req.cookies.get('token')?.value;
-
-    if (!token) return errorResponse('Unauthorized', 401);
-
-    const session = await verifyToken(token);
+    const session = await getAuthSession(req);
     if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPERVISOR)) {
       return errorResponse('Forbidden', 403);
     }
@@ -64,3 +53,4 @@ export async function POST(req: NextRequest) {
     return errorResponse((error as Error).message, 500);
   }
 }
+
