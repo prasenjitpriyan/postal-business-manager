@@ -25,5 +25,12 @@ const BusinessContributionSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+BusinessContributionSchema.index({ officialId: 1 });
+BusinessContributionSchema.index({ contributionDate: -1 });
+BusinessContributionSchema.index({ contributeOffice: 1 });
+BusinessContributionSchema.index({ accountType: 1 });
+BusinessContributionSchema.index({ createdBy: 1 });
+BusinessContributionSchema.index({ contributionDate: -1, createdAt: -1 });
+
 export const BusinessContribution: Model<IBusinessContribution> = 
   mongoose.models.BusinessContribution || mongoose.model<IBusinessContribution>('BusinessContribution', BusinessContributionSchema);

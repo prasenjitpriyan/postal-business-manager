@@ -29,6 +29,12 @@ const OfficialSchema: Schema = new Schema(
   { timestamps: true }
 )
 
+OfficialSchema.index({ name: 1 })
+OfficialSchema.index({ status: 1 })
+OfficialSchema.index({ office: 1 })
+OfficialSchema.index({ designation: 1 })
+OfficialSchema.index({ employeeId: 1 })
+
 // Clear mongoose model cache for hot reload in development
 if (mongoose.models.Official) {
   delete mongoose.models.Official

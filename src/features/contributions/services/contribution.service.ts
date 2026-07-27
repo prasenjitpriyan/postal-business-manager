@@ -23,7 +23,7 @@ export class ContributionService {
           { name: { $regex: search, $options: 'i' } },
           { designation: { $regex: search, $options: 'i' } },
         ],
-      }).select('_id');
+      }).select('_id').lean();
       const officialIds = matchingOfficials.map(o => o._id);
 
       query.$or = [
@@ -48,7 +48,8 @@ export class ContributionService {
       query.officialId = new mongoose.Types.ObjectId(officialId);
     }
 
-    let contributions;
+    const totalPromise = BusinessContribution.countDocuments(query);
+    let contributionsPromise;
     const hasOfficialSort = sortArray.some(s => s.id === 'officialId.name');
 
     if (hasOfficialSort) {
@@ -57,11 +58,6 @@ export class ContributionService {
       if (Object.keys(query).length > 0) {
         pipeline.push({ $match: query });
       }
-
-      // MongoDB Collation for case-insensitive sort can be applied to the pipeline,
-      // but simpler is just to let MongoDB sort on the string directly. To do true case-insensitive
-      // sort, we'd need to use collation or `$toLower`. Let's stick to standard sort for now
-      // since collation requires passing options to the query.
 
       pipeline.push(
         {
@@ -84,7 +80,6 @@ export class ContributionService {
         { $unwind: { path: '$creator', preserveNullAndEmptyArrays: true } }
       );
 
-      // Build sort object
       const sortObj: Record<string, 1 | -1> = {};
       sortArray.forEach(s => {
         const field = s.id === 'officialId.name' ? 'official.name' : s.id;
@@ -110,7 +105,7 @@ export class ContributionService {
       });
       pipeline.push({ $project: { official: 0, creator: 0 } });
 
-      contributions = await BusinessContribution.aggregate(pipeline).collation({ locale: 'en', strength: 2 });
+      contributionsPromise = BusinessContribution.aggregate(pipeline).collation({ locale: 'en', strength: 2 });
     } else {
       const sortObj: Record<string, 1 | -1> = {};
       sortArray.forEach(s => {
@@ -118,16 +113,17 @@ export class ContributionService {
       });
       if (!sortObj.createdAt) sortObj.createdAt = -1;
 
-      contributions = await BusinessContribution.find(query)
+      contributionsPromise = BusinessContribution.find(query)
         .populate('officialId', 'name designation')
         .populate('createdBy', 'name')
         .collation({ locale: 'en', strength: 2 })
         .sort(sortObj)
         .skip((page - 1) * limit)
-        .limit(limit);
+        .limit(limit)
+        .lean();
     }
 
-    const total = await BusinessContribution.countDocuments(query);
+    const [contributions, total] = await Promise.all([contributionsPromise, totalPromise]);
 
     return {
       contributions,
@@ -141,7 +137,7 @@ export class ContributionService {
   }
 
   static async getContributionById(id: string) {
-    const contribution = await BusinessContribution.findById(id).populate('officialId', 'name designation');
+    const contribution = await BusinessContribution.findById(id).populate('officialId', 'name designation').lean();
     if (!contribution) throw new Error('Contribution not found');
     return contribution;
   }

@@ -4,53 +4,60 @@ import { Official } from '@/models/Official';
 export class DashboardService {
   static async getDashboardStats() {
     try {
-      const totalContributions = await BusinessContribution.countDocuments();
-      const totalOfficials = await Official.countDocuments();
-
-      const totalAccountsResult = await BusinessContribution.aggregate([
-        { $group: { _id: null, total: { $sum: '$accountsOpened' } } }
+      const [
+        totalContributions,
+        totalOfficials,
+        totalAccountsResult,
+        topOfficeResult,
+        recentActivity,
+        topOfficialsResult,
+        accountsByTypeResult
+      ] = await Promise.all([
+        BusinessContribution.countDocuments(),
+        Official.countDocuments(),
+        BusinessContribution.aggregate([
+          { $group: { _id: null, total: { $sum: '$accountsOpened' } } }
+        ]),
+        BusinessContribution.aggregate([
+          { $group: { _id: '$contributeOffice', totalAccounts: { $sum: '$accountsOpened' } } },
+          { $sort: { totalAccounts: -1 } },
+          { $limit: 1 }
+        ]),
+        BusinessContribution.find()
+          .sort({ contributionDate: -1, createdAt: -1 })
+          .limit(6)
+          .populate('officialId', 'name office designation')
+          .lean(),
+        BusinessContribution.aggregate([
+          { $group: { _id: '$officialId', totalAccounts: { $sum: '$accountsOpened' } } },
+          { $sort: { totalAccounts: -1 } },
+          { $limit: 5 },
+          {
+            $lookup: {
+              from: 'officials',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'official'
+            }
+          },
+          { $unwind: '$official' },
+          {
+            $project: {
+              name: '$official.name',
+              designation: '$official.designation',
+              office: '$official.office',
+              totalAccounts: 1
+            }
+          }
+        ]),
+        BusinessContribution.aggregate([
+          { $group: { _id: '$accountType', count: { $sum: '$accountsOpened' } } },
+          { $sort: { count: -1 } }
+        ])
       ]);
+
       const totalAccountsOpened = totalAccountsResult[0]?.total || 0;
-
-      const topOfficeResult = await BusinessContribution.aggregate([
-        { $group: { _id: '$contributeOffice', totalAccounts: { $sum: '$accountsOpened' } } },
-        { $sort: { totalAccounts: -1 } },
-        { $limit: 1 }
-      ]);
       const topOffice = topOfficeResult.length > 0 ? topOfficeResult[0]._id : '--';
-
-      const recentActivity = await BusinessContribution.find()
-        .sort({ contributionDate: -1, createdAt: -1 })
-        .limit(6)
-        .populate('officialId', 'name office designation');
-
-      const topOfficialsResult = await BusinessContribution.aggregate([
-        { $group: { _id: '$officialId', totalAccounts: { $sum: '$accountsOpened' } } },
-        { $sort: { totalAccounts: -1 } },
-        { $limit: 5 },
-        {
-          $lookup: {
-            from: 'officials',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'official'
-          }
-        },
-        { $unwind: '$official' },
-        {
-          $project: {
-            name: '$official.name',
-            designation: '$official.designation',
-            office: '$official.office',
-            totalAccounts: 1
-          }
-        }
-      ]);
-
-      const accountsByTypeResult = await BusinessContribution.aggregate([
-        { $group: { _id: '$accountType', count: { $sum: '$accountsOpened' } } },
-        { $sort: { count: -1 } }
-      ]);
 
       return {
         totalContributions,

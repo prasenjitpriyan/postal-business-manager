@@ -40,13 +40,16 @@ export class OfficialService {
     });
     if (!sortOptions.createdAt) sortOptions.createdAt = -1;
 
-    const officials = await Official.find(query)
+    const officialsPromise = Official.find(query)
       .collation({ locale: 'en', strength: 2 })
       .sort(sortOptions)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    const total = await Official.countDocuments(query);
+    const totalPromise = Official.countDocuments(query);
+
+    const [officials, total] = await Promise.all([officialsPromise, totalPromise]);
 
     return {
       officials,
@@ -60,7 +63,7 @@ export class OfficialService {
   }
 
   static async getOfficialById(id: string) {
-    const official = await Official.findById(id);
+    const official = await Official.findById(id).lean();
     if (!official) throw new Error('Official not found');
     return official;
   }
