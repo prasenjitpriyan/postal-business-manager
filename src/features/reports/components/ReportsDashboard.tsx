@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { 
   PieChart, Pie, Cell, 
   BarChart, Bar, 
@@ -22,10 +24,57 @@ import { toast } from 'sonner';
 const COLORS = ['#4f46e5', '#ec4899', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6'];
 
 export function ReportsDashboard() {
+  const container = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'offices' | 'details'>('overview');
   const [preset, setPreset] = useState<'all' | '30d' | '90d' | 'custom'>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+
+  const handleTabChange = (tab: 'overview' | 'trends' | 'offices' | 'details') => {
+    if (tab === activeTab) return;
+    if (container.current) {
+      const tabContent = container.current.querySelector('.gsap-tab-content');
+      if (tabContent) {
+        gsap.to(tabContent, {
+          opacity: 0,
+          y: -10,
+          duration: 0.15,
+          onComplete: () => {
+            setActiveTab(tab);
+            gsap.fromTo(tabContent, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+          }
+        });
+        return;
+      }
+    }
+    setActiveTab(tab);
+  };
+
+  useGSAP(() => {
+    if (!container.current) return;
+    const tl = gsap.timeline();
+
+    tl.fromTo('.gsap-report-filter', 
+      { y: -15, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+    )
+    .fromTo('.gsap-kpi-card',
+      { y: 30, opacity: 0, scale: 0.95 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.08, ease: 'back.out(1.4)' },
+      '-=0.2'
+    )
+    .fromTo('.gsap-report-tabs',
+      { y: 15, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' },
+      '-=0.2'
+    )
+    .fromTo('.gsap-tab-content',
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' },
+      '-=0.1'
+    );
+  }, { scope: container });
+
 
   const handlePresetChange = (selected: 'all' | '30d' | '90d' | 'custom') => {
     setPreset(selected);
@@ -114,9 +163,9 @@ export function ReportsDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div ref={container} className="space-y-6">
       {/* Date Filter & Action Bar */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-slate-950/60 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
+      <div className="gsap-report-filter flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-slate-950/60 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mr-2">
             <Calendar className="w-4 h-4 text-indigo-400" /> Date Range:
@@ -183,7 +232,7 @@ export function ReportsDashboard() {
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-indigo-500/50 transition-colors">
+        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-indigo-500/50 hover:scale-[1.02] transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-slate-400">Total Accounts</CardTitle>
             <TrendingUp className="h-4 w-4 text-indigo-400" />
@@ -194,7 +243,7 @@ export function ReportsDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-sky-500/50 transition-colors">
+        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-sky-500/50 hover:scale-[1.02] transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-slate-400">Total Entries</CardTitle>
             <Activity className="h-4 w-4 text-sky-400" />
@@ -205,7 +254,7 @@ export function ReportsDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-purple-500/50 transition-colors">
+        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-purple-500/50 hover:scale-[1.02] transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-slate-400">Avg. Per Entry</CardTitle>
             <BarChart3 className="h-4 w-4 text-purple-400" />
@@ -216,7 +265,7 @@ export function ReportsDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-pink-500/50 transition-colors">
+        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-pink-500/50 hover:scale-[1.02] transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-slate-400">Top Official</CardTitle>
             <Users className="h-4 w-4 text-pink-400" />
@@ -231,7 +280,7 @@ export function ReportsDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-amber-500/50 transition-colors">
+        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-amber-500/50 hover:scale-[1.02] transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium text-slate-400">Top Office</CardTitle>
             <Building2 className="h-4 w-4 text-amber-400" />
@@ -248,9 +297,9 @@ export function ReportsDashboard() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-white/10 gap-2">
+      <div className="gsap-report-tabs flex border-b border-white/10 gap-2">
         <button
-          onClick={() => setActiveTab('overview')}
+          onClick={() => handleTabChange('overview')}
           className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'overview'
               ? 'border-indigo-500 text-indigo-400'
@@ -260,7 +309,7 @@ export function ReportsDashboard() {
           <LayoutGrid className="w-4 h-4" /> Overview & Breakdown
         </button>
         <button
-          onClick={() => setActiveTab('trends')}
+          onClick={() => handleTabChange('trends')}
           className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'trends'
               ? 'border-indigo-500 text-indigo-400'
@@ -270,7 +319,7 @@ export function ReportsDashboard() {
           <LineChartIcon className="w-4 h-4" /> Growth Trends
         </button>
         <button
-          onClick={() => setActiveTab('offices')}
+          onClick={() => handleTabChange('offices')}
           className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'offices'
               ? 'border-indigo-500 text-indigo-400'
@@ -280,7 +329,7 @@ export function ReportsDashboard() {
           <Building2 className="w-4 h-4" /> Office Analysis
         </button>
         <button
-          onClick={() => setActiveTab('details')}
+          onClick={() => handleTabChange('details')}
           className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'details'
               ? 'border-indigo-500 text-indigo-400'
@@ -290,6 +339,9 @@ export function ReportsDashboard() {
           <FileText className="w-4 h-4" /> Report Logs
         </button>
       </div>
+
+      {/* Tab Container */}
+      <div className="gsap-tab-content">
 
       {/* Tab 1: Overview */}
       {activeTab === 'overview' && (
@@ -480,6 +532,8 @@ export function ReportsDashboard() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }
+

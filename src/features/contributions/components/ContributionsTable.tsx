@@ -64,8 +64,8 @@ export function ContributionsTable() {
         if (rows && rows.length > 0) {
           gsap.fromTo(
             rows,
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+            { opacity: 0, y: 15, scale: 0.98 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(1.2)' }
           );
         }
       }
