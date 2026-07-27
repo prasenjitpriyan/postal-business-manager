@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'http://localhost:3000'; // Replace with actual domain when deployed
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://postal-business-manager.vercel.app';
 
   // We only include public-facing marketing/auth pages in the sitemap.
   // Private dashboard routes are excluded for SEO since they require authentication.

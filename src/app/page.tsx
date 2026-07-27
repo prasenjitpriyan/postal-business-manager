@@ -187,8 +187,8 @@ export default function LandingPage() {
         </p>
 
         <div className="hero-btn flex flex-col sm:flex-row items-center gap-4">
-          <Link href="/dashboard">
-            <Button size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all hover:scale-105 hover:-translate-y-1 group relative overflow-hidden">
+          <Link href="/dashboard" id="hero-get-started-link">
+            <Button id="hero-get-started-btn" size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all hover:scale-105 hover:-translate-y-1 group relative overflow-hidden">
               <span className="relative z-10 flex items-center">
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -198,30 +198,33 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        {/* Feature Cards */}
-        <div className="feature-cards-container grid md:grid-cols-3 gap-6 mt-28 w-full max-w-6xl px-4 text-left">
-          <div className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6">
-              <Zap className="w-6 h-6 text-blue-400" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
-            <p className="text-slate-400 text-left">Optimized performance ensures your data is always ready when you need it.</p>
+        {/* Feature Cards Section */}
+        <section aria-labelledby="features-heading" className="w-full max-w-6xl mt-28">
+          <h2 id="features-heading" className="sr-only">Key Features of Postal Manager</h2>
+          <div className="feature-cards-container grid md:grid-cols-3 gap-6 px-4 text-left">
+            <article className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6">
+                <Zap className="w-6 h-6 text-blue-400" aria-hidden="true" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
+              <p className="text-slate-400 text-left">Optimized performance ensures your data is always ready when you need it.</p>
+            </article>
+            <article className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6">
+                <Shield className="w-6 h-6 text-indigo-400" aria-hidden="true" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Secure by Design</h3>
+              <p className="text-slate-400 text-left">Enterprise-grade security keeps your officials&apos; data and contributions protected.</p>
+            </article>
+            <article className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6">
+                <Box className="w-6 h-6 text-purple-400" aria-hidden="true" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Comprehensive Tracking</h3>
+              <p className="text-slate-400 text-left">Monitor contributions across all offices from a single unified dashboard.</p>
+            </article>
           </div>
-          <div className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6">
-              <Shield className="w-6 h-6 text-indigo-400" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">Secure by Design</h3>
-            <p className="text-slate-400 text-left">Enterprise-grade security keeps your officials&apos; data and contributions protected.</p>
-          </div>
-          <div className="feature-card flex flex-col items-start p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/[0.07] transition-all hover:-translate-y-2 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6">
-              <Box className="w-6 h-6 text-purple-400" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">Comprehensive Tracking</h3>
-            <p className="text-slate-400 text-left">Monitor contributions across all offices from a single unified dashboard.</p>
-          </div>
-        </div>
+        </section>
       </main>
 
       {/* Footer */}
@@ -229,7 +232,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="footer-brand flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <Box className="w-4 h-4 text-white" />
+              <Box className="w-4 h-4 text-white" aria-hidden="true" />
             </div>
             <span className="text-lg font-bold tracking-tight">Postal Manager</span>
           </div>
@@ -238,11 +241,11 @@ export default function LandingPage() {
             © {new Date().getFullYear()} Postal Business Manager. All rights reserved.
           </p>
           
-          <div className="flex gap-6">
-            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
-          </div>
+          <nav aria-label="Footer Navigation" className="flex gap-6">
+            <Link href="#" id="footer-privacy-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="#" id="footer-terms-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="#" id="footer-contact-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
+          </nav>
         </div>
       </footer>
     </div>

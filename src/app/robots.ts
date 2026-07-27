@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://postal-business-manager.vercel.app';
+
   return {
     rules: {
       userAgent: '*',
       allow: ['/', '/login', '/signup'],
       disallow: ['/dashboard/', '/api/', '/_next/'],
     },
-    sitemap: 'http://localhost:3000/sitemap.xml', // Replace with actual domain when deployed
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
