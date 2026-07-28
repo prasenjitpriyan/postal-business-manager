@@ -1,16 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { 
-  PieChart, Pie, Cell, 
-  BarChart, Bar, 
-  AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, 
-  Tooltip as RechartsTooltip, ResponsiveContainer, Legend
-} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +15,27 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const COLORS = ['#4f46e5', '#ec4899', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6'];
+const ChartSkeleton = () => (
+  <div className="flex flex-col items-center justify-center h-80 w-full bg-slate-950/40 rounded-xl border border-white/5 animate-pulse space-y-3">
+    <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+    <p className="text-xs text-slate-400">Loading chart visualization...</p>
+  </div>
+);
+
+const ReportsOverviewCharts = dynamic(
+  () => import('./ReportsOverviewCharts').then((mod) => mod.ReportsOverviewCharts),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+const ReportsTrendsCharts = dynamic(
+  () => import('./ReportsTrendsCharts').then((mod) => mod.ReportsTrendsCharts),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+const ReportsOfficesCharts = dynamic(
+  () => import('./ReportsOfficesCharts').then((mod) => mod.ReportsOfficesCharts),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
 
 export function ReportsDashboard() {
   const container = useRef<HTMLDivElement>(null);
@@ -345,142 +359,17 @@ export function ReportsDashboard() {
 
       {/* Tab 1: Overview */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pie Chart: Accounts by Type */}
-          <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-4">
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Accounts Distribution by Type</CardTitle>
-              <CardDescription className="text-xs text-slate-400">Ratio of business account products</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80">
-              {summary.accountsByType.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">No account data found</div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={summary.accountsByType}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      fill="#8884d8"
-                      paddingAngle={4}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                    >
-                      {summary.accountsByType.map((_: { name: string; value: number }, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip 
-                      contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
-                      itemStyle={{ color: '#fff' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Bar Chart: Top Officials */}
-          <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-4">
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Top Performing Officials</CardTitle>
-              <CardDescription className="text-xs text-slate-400">Total accounts opened per official</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80">
-              {summary.accountsByOfficial.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">No official data found</div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={summary.accountsByOfficial}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={true} vertical={false} />
-                    <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={12} />
-                    <YAxis dataKey="name" type="category" width={110} stroke="rgba(255,255,255,0.4)" tick={{fill: 'rgba(255,255,255,0.8)', fontSize: 11}} />
-                    <RechartsTooltip 
-                      contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
-                      cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                    />
-                    <Bar dataKey="accounts" name="Accounts Opened" fill="#4f46e5" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <ReportsOverviewCharts summary={summary} />
       )}
 
       {/* Tab 2: Growth Trends */}
       {activeTab === 'trends' && (
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-4">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Contribution Growth Over Time</CardTitle>
-            <CardDescription className="text-xs text-slate-400">Timeline of total accounts opened per date</CardDescription>
-          </CardHeader>
-          <CardContent className="h-96">
-            {summary.contributionsOverTime.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-500">No trend data available for this range</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={summary.contributionsOverTime}
-                  margin={{ top: 10, right: 30, left: 10, bottom: 20 }}
-                >
-                  <defs>
-                    <linearGradient id="colorAccounts" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-                  <XAxis dataKey="date" stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                  <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
-                  />
-                  <Legend verticalAlign="top" height={36} />
-                  <Area type="monotone" dataKey="accounts" name="Accounts Opened" stroke="#0ea5e9" fillOpacity={1} fill="url(#colorAccounts)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+        <ReportsTrendsCharts summary={summary} />
       )}
 
       {/* Tab 3: Office Analysis */}
       {activeTab === 'offices' && (
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-4">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Postal Office Performance Ranking</CardTitle>
-            <CardDescription className="text-xs text-slate-400">Total volume of accounts opened across offices</CardDescription>
-          </CardHeader>
-          <CardContent className="h-96">
-            {summary.accountsByOffice.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-500">No office data available</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={summary.accountsByOffice}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" fontSize={11} angle={-25} textAnchor="end" />
-                  <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '8px' }}
-                    cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                  />
-                  <Bar dataKey="accounts" name="Accounts Opened" fill="#10b981" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+        <ReportsOfficesCharts summary={summary} />
       )}
 
       {/* Tab 4: Details Table */}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
   ColumnDef,
@@ -22,12 +23,21 @@ import {
 } from '@/components/ui/table';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BusinessContribution } from '@/types/contribution';
-import { AddContributionDialog } from './AddContributionDialog';
-import { EditContributionDialog } from './EditContributionDialog';
-import { DeleteContributionDialog } from './DeleteContributionDialog';
-import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
+
+const AddContributionDialog = dynamic(
+  () => import('./AddContributionDialog').then((mod) => mod.AddContributionDialog),
+  { ssr: false }
+);
+const EditContributionDialog = dynamic(
+  () => import('./EditContributionDialog').then((mod) => mod.EditContributionDialog),
+  { ssr: false }
+);
+const DeleteContributionDialog = dynamic(
+  () => import('./DeleteContributionDialog').then((mod) => mod.DeleteContributionDialog),
+  { ssr: false }
+);
 
 
 export function ContributionsTable() {

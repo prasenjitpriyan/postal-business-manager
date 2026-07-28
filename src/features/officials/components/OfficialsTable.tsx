@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -21,13 +23,21 @@ import {
   useReactTable,
   SortingState,
 } from '@tanstack/react-table'
-import { useState } from 'react'
-import { AddOfficialDialog } from './AddOfficialDialog'
-import { DeleteOfficialDialog } from './DeleteOfficialDialog'
-import { EditOfficialDialog } from './EditOfficialDialog'
-import { useRef } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+
+const AddOfficialDialog = dynamic(
+  () => import('./AddOfficialDialog').then((mod) => mod.AddOfficialDialog),
+  { ssr: false }
+)
+const EditOfficialDialog = dynamic(
+  () => import('./EditOfficialDialog').then((mod) => mod.EditOfficialDialog),
+  { ssr: false }
+)
+const DeleteOfficialDialog = dynamic(
+  () => import('./DeleteOfficialDialog').then((mod) => mod.DeleteOfficialDialog),
+  { ssr: false }
+)
 
 export function OfficialsTable() {
   const [page, setPage] = useState(1)
