@@ -2,27 +2,56 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://postal-business-manager.vercel.app';
+  const currentDate = new Date();
 
-  // We only include public-facing marketing/auth pages in the sitemap.
-  // Private dashboard routes are excluded for SEO since they require authentication.
   return [
     {
       url: `${baseUrl}/`,
-      lastModified: new Date(),
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/dashboard`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/dashboard/insurance`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/dashboard/officials`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/dashboard/contributions`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/dashboard/reports`,
+      lastModified: currentDate,
       changeFrequency: 'weekly',
-      priority: 1,
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/login`,
-      lastModified: new Date(),
+      lastModified: currentDate,
       changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 0.6,
     },
     {
       url: `${baseUrl}/signup`,
-      lastModified: new Date(),
+      lastModified: currentDate,
       changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 0.6,
     },
   ];
 }

@@ -22,54 +22,69 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://postal-business-mana
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Postal Business Manager - Official Tracking & Contribution Analytics',
+    default: 'Postal Business Manager - India Post Official Tracking & PLI / RPLI Analytics',
     template: '%s | Postal Business Manager',
   },
   description:
-    'The advanced, all-in-one management system designed to track postal officials, oversee business contributions, and generate comprehensive reports seamlessly.',
+    'The premier all-in-one postal business management platform. Track postal officials, monitor PLI and RPLI policy contributions, analyze office of indexing metrics, and generate real-time analytical reports.',
   keywords: [
-    'Postal Business',
-    'Business Management',
-    'Officials Tracker',
-    'Contribution Manager',
-    'Postal Portal',
-    'Postal Analytics',
-    'Postal Operations',
+    'India Post Business',
+    'Postal Life Insurance',
+    'PLI Management',
+    'RPLI Management',
+    'Rural Postal Life Insurance',
+    'Postal Business Manager',
+    'Postal Officials Tracker',
+    'Office of Indexing Analytics',
+    'Postal Accounts Tracker',
+    'Postal Operations Portal',
+    'Postal Contribution Analytics',
+    'Government Postal Manager',
+    'Sum Assured Tracker',
+    'Initial Premium Analytics',
   ],
   authors: [{ name: 'Postal Business Manager Team' }],
   creator: 'Postal Business Manager',
   publisher: 'Postal Business Manager',
   category: 'Business & Finance Management',
+  referrer: 'origin-when-cross-origin',
   alternates: {
     canonical: siteUrl,
+    languages: {
+      'en-IN': siteUrl,
+      'en-US': siteUrl,
+    },
   },
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'en_IN',
+    alternateLocale: ['en_US'],
     url: siteUrl,
-    title: 'Postal Business Manager - Official Tracking & Contribution Analytics',
+    title: 'Postal Business Manager - India Post Official Tracking & PLI / RPLI Analytics',
     description:
-      'The advanced, all-in-one management system designed to track postal officials and oversee business contributions.',
+      'Empowering postal operations with advanced analytics. Oversee postal officials, track PLI & RPLI policy growth, and analyze indexing performance.',
     siteName: 'Postal Business Manager',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Postal Business Manager Dashboard Preview',
+        type: 'image/png',
+        alt: 'Postal Business Manager Dashboard & PLI / RPLI Analytics',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Postal Business Manager - Official Tracking & Contribution Analytics',
+    title: 'Postal Business Manager - India Post Official Tracking & PLI / RPLI Analytics',
     description:
-      'The advanced, all-in-one management system designed to track postal officials and oversee business contributions.',
+      'Empowering postal operations with advanced analytics. Oversee postal officials, track PLI & RPLI policy growth, and analyze indexing performance.',
     images: ['/twitter-image.png'],
     creator: '@postalmanager',
   },
   icons: {
     icon: '/icon.png',
+    shortcut: '/icon.png',
     apple: '/icon.png',
   },
   applicationName: 'Postal Business Manager',
@@ -103,27 +118,65 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const jsonLd = {
+  const jsonLdSoftware = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'Postal Business Manager',
     operatingSystem: 'All',
     applicationCategory: 'BusinessApplication',
+    url: siteUrl,
     description:
-      'The advanced, all-in-one management system designed to track postal officials, oversee business contributions, and generate comprehensive reports seamlessly.',
+      'The premier all-in-one postal business management platform. Track postal officials, monitor PLI and RPLI policy contributions, analyze office of indexing metrics, and generate real-time analytical reports.',
+    featureList: [
+      'PLI & RPLI Policy Tracking & Premium Calculations',
+      'Postal Officials Directory & Management',
+      'Account Contribution Analytics & Metrics',
+      'Office of Indexing Performance Ranking',
+      'Custom CSV Exporting & Detailed Reporting',
+      'Role-based User Access Control (Admin & Viewer)',
+    ],
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'USD',
+      priceCurrency: 'INR',
     },
-  }
+  };
+
+  const jsonLdOrganization = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Postal Business Manager',
+    url: siteUrl,
+    logo: `${siteUrl}/icon.png`,
+    description: 'Official tracking & business contribution analytics system for postal operations.',
+  };
+
+  const jsonLdWebSite = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Postal Business Manager',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteUrl}/dashboard/officials?search={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>

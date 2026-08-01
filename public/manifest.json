@@ -1,16 +1,20 @@
 {
-  "name": "Postal Business Manager",
+  "name": "Postal Business Manager - India Post Analytics",
   "short_name": "Postal Manager",
-  "description": "The advanced, all-in-one management system designed to track postal officials and oversee business contributions.",
+  "description": "The premier all-in-one postal business management platform. Track postal officials, monitor PLI and RPLI policy contributions, analyze office of indexing metrics, and generate real-time analytical reports.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#020617",
   "theme_color": "#020617",
+  "categories": ["business", "finance", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
