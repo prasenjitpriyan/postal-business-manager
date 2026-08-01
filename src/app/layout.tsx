@@ -2,16 +2,19 @@ import { Toaster } from '@/components/ui/sonner'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta',
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://postal-business-manager.vercel.app';
@@ -116,7 +119,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

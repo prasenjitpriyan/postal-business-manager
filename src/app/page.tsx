@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Box, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PostalLogo } from '@/components/brand/PostalLogo';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -169,23 +170,22 @@ export default function LandingPage() {
         </svg>
       </div>
 
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10 backdrop-blur-md bg-slate-950/50">
-        <div className="header-logo flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <Box className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">Postal Manager</span>
+      <header className="relative z-10 flex items-center justify-between px-4 sm:px-8 py-5 border-b border-white/10 backdrop-blur-md bg-slate-950/60">
+        <div className="header-logo">
+          <PostalLogo size="md" />
         </div>
-        <nav className="flex items-center gap-6">
-          <Link href="/login" className="header-link text-sm font-medium text-slate-300 hover:text-white transition-colors">
-            Sign In
-          </Link>
-          <Link href="/dashboard" className="header-link">
-            <Button className="bg-white text-slate-950 hover:bg-slate-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-              Go to Dashboard
+        <div className="header-actions flex items-center gap-3">
+          <Link href="/login" id="login-nav-btn">
+            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10 text-xs sm:text-sm font-semibold min-h-11">
+              Sign In
             </Button>
           </Link>
-        </nav>
+          <Link href="/signup" id="signup-nav-btn">
+            <Button className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs sm:text-sm min-h-11 shadow-lg shadow-blue-500/20">
+              Get Started
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-24 pb-24 text-center">

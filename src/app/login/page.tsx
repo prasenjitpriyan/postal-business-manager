@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
+import { PostalLogo } from '@/components/brand/PostalLogo'
 import {
   Card,
   CardContent,
@@ -144,17 +145,15 @@ export default function LoginPage() {
       </div>
 
       <Card className="auth-card relative z-10 w-full max-w-md shadow-2xl border-white/10 bg-slate-900/60 backdrop-blur-2xl text-slate-50">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <Link href="/">
-            <div className="auth-header-item w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all hover:scale-105 cursor-pointer">
-              <Mail className="text-white w-8 h-8" />
-            </div>
+        <CardHeader className="space-y-3 text-center pb-6">
+          <Link href="/" className="inline-block mx-auto">
+            <PostalLogo size="lg" showText={false} />
           </Link>
-          <CardTitle className="auth-header-item text-2xl font-bold tracking-tight text-white">
+          <CardTitle className="auth-header-item text-2xl font-extrabold tracking-tight text-white">
             Postal Business Manager
           </CardTitle>
-          <CardDescription className="auth-header-item text-slate-400">
-            Enter your credentials to access your account
+          <CardDescription className="auth-header-item text-slate-400 text-xs sm:text-sm">
+            Official Portal • Sign in to access contribution & insurance analytics
           </CardDescription>
         </CardHeader>
         <CardContent>
