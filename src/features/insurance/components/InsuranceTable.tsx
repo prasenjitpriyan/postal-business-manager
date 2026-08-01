@@ -22,10 +22,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck, IndianRupee, FileCheck, Layers } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck, IndianRupee, FileCheck, Layers, Download } from 'lucide-react';
 import { InsuranceContribution, InsuranceType } from '@/types/insurance';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { toast } from 'sonner';
 
 const AddInsuranceDialog = dynamic(
   () => import('./AddInsuranceDialog').then((mod) => mod.AddInsuranceDialog),
@@ -68,6 +69,56 @@ export function InsuranceTable() {
     queryFn: fetchInsurance,
     placeholderData: keepPreviousData,
   });
+
+  const handleExportCSV = async () => {
+    try {
+      let url = `/api/insurance?page=1&limit=10000&search=${encodeURIComponent(search)}&sort=${encodeURIComponent(JSON.stringify(sorting))}`;
+      if (startDate) url += `&startDate=${startDate}`;
+      if (endDate) url += `&endDate=${endDate}`;
+      if (typeFilter !== 'ALL') url += `&insuranceType=${typeFilter}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch insurance data for export');
+      const responseData = await res.json();
+      const contributions = responseData?.data?.contributions || [];
+
+      if (contributions.length === 0) {
+        toast.error('No insurance records match current filters to export.');
+        return;
+      }
+
+      const headers = ['Contribution Date', 'Official Name', 'Office of Indexing', 'Insurance Type', 'Sum Assured (INR)', 'Initial Premium (INR)', 'Remarks'];
+      const csvRows = [headers.join(',')];
+
+      contributions.forEach((c: InsuranceContribution) => {
+        const official = c.officialId as { name?: string };
+        const row = [
+          `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
+          `"${official?.name || 'N/A'}"`,
+          `"${c.officeOfIndexing || ''}"`,
+          `"${c.insuranceType || ''}"`,
+          c.sumAssured || 0,
+          c.initialPremium || 0,
+          `"${(c.remarks || '').replace(/"/g, '""')}"`
+        ];
+        csvRows.push(row.join(','));
+      });
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', `Insurance_Particulars_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Insurance records exported to CSV!');
+    } catch (err) {
+      console.error('Error exporting insurance CSV:', err);
+      toast.error('Failed to export CSV report');
+    }
+  };
+
 
   useGSAP(
     () => {
@@ -366,7 +417,17 @@ export function InsuranceTable() {
           </div>
         </div>
 
-        <AddInsuranceDialog />
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleExportCSV}
+            variant="outline"
+            size="sm"
+            className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border-emerald-500/30 font-medium transition-colors"
+          >
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+          <AddInsuranceDialog />
+        </div>
       </div>
 
       {/* Main Data Table */}

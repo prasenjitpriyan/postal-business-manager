@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { BusinessContribution } from '@/models/BusinessContribution';
+import { InsuranceContribution } from '@/models/InsuranceContribution';
 
 export class ReportService {
   static async getDashboardSummary(startDate?: string, endDate?: string) {
@@ -15,12 +16,12 @@ export class ReportService {
         }
       }
 
-      const pipeline: mongoose.PipelineStage[] = [];
+      const bizPipeline: mongoose.PipelineStage[] = [];
       if (Object.keys(matchStage).length > 0) {
-        pipeline.push({ $match: matchStage });
+        bizPipeline.push({ $match: matchStage });
       }
 
-      pipeline.push({
+      bizPipeline.push({
         $facet: {
           totalAccounts: [
             { $group: { _id: null, sum: { $sum: '$accountsOpened' }, count: { $sum: 1 } } }
@@ -67,7 +68,7 @@ export class ReportService {
           ],
           recentContributions: [
             { $sort: { contributionDate: -1, createdAt: -1 } },
-            { $limit: 10 },
+            { $limit: 200 },
             {
               $lookup: {
                 from: 'officials',
@@ -81,35 +82,89 @@ export class ReportService {
         }
       });
 
-      const [result] = await BusinessContribution.aggregate(pipeline);
+      const insPipeline: mongoose.PipelineStage[] = [];
+      if (Object.keys(matchStage).length > 0) {
+        insPipeline.push({ $match: matchStage });
+      }
 
-      const totalAccounts = result.totalAccounts[0]?.sum || 0;
-      const totalEntries = result.totalAccounts[0]?.count || 0;
+      insPipeline.push({
+        $facet: {
+          insuranceSummary: [
+            {
+              $group: {
+                _id: null,
+                totalSumAssured: { $sum: '$sumAssured' },
+                totalInitialPremium: { $sum: '$initialPremium' },
+                totalInsuranceEntries: { $sum: 1 },
+                pliCount: { $sum: { $cond: [{ $eq: ['$insuranceType', 'PLI'] }, 1, 0] } },
+                rpliCount: { $sum: { $cond: [{ $eq: ['$insuranceType', 'RPLI'] }, 1, 0] } }
+              }
+            }
+          ],
+          insuranceContributions: [
+            { $sort: { contributionDate: -1, createdAt: -1 } },
+            { $limit: 200 },
+            {
+              $lookup: {
+                from: 'officials',
+                localField: 'officialId',
+                foreignField: '_id',
+                as: 'official'
+              }
+            },
+            { $unwind: { path: '$official', preserveNullAndEmptyArrays: true } }
+          ]
+        }
+      });
+
+      const [[bizResult], [insResult]] = await Promise.all([
+        BusinessContribution.aggregate(bizPipeline),
+        InsuranceContribution.aggregate(insPipeline)
+      ]);
+
+      const totalAccounts = bizResult.totalAccounts[0]?.sum || 0;
+      const totalEntries = bizResult.totalAccounts[0]?.count || 0;
       const avgAccountsPerEntry = totalEntries > 0 ? Number((totalAccounts / totalEntries).toFixed(1)) : 0;
+
+      const insSum = insResult.insuranceSummary[0] || {
+        totalSumAssured: 0,
+        totalInitialPremium: 0,
+        totalInsuranceEntries: 0,
+        pliCount: 0,
+        rpliCount: 0
+      };
 
       return {
         totalAccounts,
         totalEntries,
         avgAccountsPerEntry,
-        accountsByType: result.accountsByType.map((item: { _id: string; count: number }) => ({
+        accountsByType: bizResult.accountsByType.map((item: { _id: string; count: number }) => ({
           name: item._id || 'Unspecified',
           value: item.count
         })),
-        accountsByOffice: result.accountsByOffice.map((item: { _id: string; count: number }) => ({
+        accountsByOffice: bizResult.accountsByOffice.map((item: { _id: string; count: number }) => ({
           name: item._id || 'Unknown',
           accounts: item.count
         })),
-        accountsByOfficial: result.accountsByOfficial.map((item: { name: string; office: string; count: number }) => ({
+        accountsByOfficial: bizResult.accountsByOfficial.map((item: { name: string; office: string; count: number }) => ({
           name: item.name || 'Unknown',
           office: item.office || '',
           accounts: item.count
         })),
-        contributionsOverTime: result.contributionsOverTime.map((item: { _id: string; accounts: number; entries: number }) => ({
+        contributionsOverTime: bizResult.contributionsOverTime.map((item: { _id: string; accounts: number; entries: number }) => ({
           date: item._id,
           accounts: item.accounts,
           entries: item.entries
         })),
-        recentContributions: result.recentContributions
+        recentContributions: bizResult.recentContributions,
+        insuranceSummary: {
+          totalSumAssured: insSum.totalSumAssured,
+          totalInitialPremium: insSum.totalInitialPremium,
+          totalInsuranceEntries: insSum.totalInsuranceEntries,
+          pliCount: insSum.pliCount,
+          rpliCount: insSum.rpliCount
+        },
+        insuranceContributions: insResult.insuranceContributions
       };
     } catch (error) {
       console.error('Error fetching dashboard summary:', error);
@@ -117,3 +172,4 @@ export class ReportService {
     }
   }
 }
+

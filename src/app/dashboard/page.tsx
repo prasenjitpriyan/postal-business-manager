@@ -29,7 +29,23 @@ export default function DashboardPage() {
     topOffice: '--',
     recentActivity: [],
     topOfficials: [],
-    accountsByType: []
+    accountsByType: [],
+    insuranceStats: {
+      totalSumAssured: 0,
+      totalInitialPremium: 0,
+      totalInsuranceEntries: 0,
+      pliCount: 0,
+      rpliCount: 0
+    },
+    recentInsuranceActivity: []
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
   };
 
   useGSAP(() => {
@@ -69,7 +85,7 @@ export default function DashboardPage() {
             Dashboard Overview
           </h1>
           <p className="dash-header-text text-slate-400 text-sm md:text-base">
-            Welcome back to the Business Contribution Management System.
+            Welcome back to the Business & Insurance Management System.
           </p>
         </div>
 
@@ -97,7 +113,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards Row */}
+      {/* Primary Business KPI Cards */}
       <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Accounts */}
         <div className="dash-metric-card flex flex-col items-start rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm shadow-lg hover:bg-white/8 transition-all hover:-translate-y-1.5 group relative overflow-hidden">
@@ -148,16 +164,69 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Insurance Particulars Summary Row */}
+      <div className="dash-widget bg-linear-to-r from-slate-950/80 via-emerald-950/20 to-slate-950/80 border border-emerald-500/20 rounded-3xl p-6 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-xl">Insurance Particulars Overview</h3>
+              <p className="text-xs text-slate-400">PLI & RPLI policy totals and initial premium summaries</p>
+            </div>
+          </div>
+          <Link href="/dashboard/insurance">
+            <Button size="sm" variant="outline" className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 text-xs">
+              Manage Insurance Policies <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+            <span className="text-xs font-medium text-slate-400">Total Sum Assured</span>
+            <p className="text-2xl font-extrabold text-white mt-1">
+              {isLoading ? '--' : formatCurrency(stats.insuranceStats?.totalSumAssured || 0)}
+            </p>
+          </div>
+          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+            <span className="text-xs font-medium text-slate-400">Total Initial Premium</span>
+            <p className="text-2xl font-extrabold text-emerald-400 mt-1">
+              {isLoading ? '--' : formatCurrency(stats.insuranceStats?.totalInitialPremium || 0)}
+            </p>
+          </div>
+          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+            <span className="text-xs font-medium text-slate-400">PLI Policies Logged</span>
+            <div className="flex items-baseline justify-between mt-1">
+              <p className="text-2xl font-extrabold text-indigo-400">
+                {isLoading ? '--' : (stats.insuranceStats?.pliCount || 0)}
+              </p>
+              <span className="text-xs text-slate-500">PLI</span>
+            </div>
+          </div>
+          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+            <span className="text-xs font-medium text-slate-400">RPLI Policies Logged</span>
+            <div className="flex items-baseline justify-between mt-1">
+              <p className="text-2xl font-extrabold text-sky-400">
+                {isLoading ? '--' : (stats.insuranceStats?.rpliCount || 0)}
+              </p>
+              <span className="text-xs text-slate-500">RPLI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Columns: Recent Activity & Product Breakdown */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Recent Activity Widget */}
+          {/* Recent Business Activity Widget */}
           <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-indigo-400" />
-                <h3 className="font-semibold text-white text-lg">Recent Business Activity</h3>
+                <h3 className="font-semibold text-white text-lg">Recent Account Contributions</h3>
               </div>
               <Link href="/dashboard/contributions" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center font-medium">
                 View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
@@ -212,6 +281,74 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Recent Insurance Activity Widget */}
+          <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-semibold text-white text-lg">Recent Insurance Particulars</h3>
+              </div>
+              <Link href="/dashboard/insurance" className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center font-medium">
+                View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 text-slate-400 font-medium">
+                    <th className="pb-3 pr-4">Date</th>
+                    <th className="pb-3 px-4">Official</th>
+                    <th className="pb-3 px-4">Indexing Office</th>
+                    <th className="pb-3 px-4">Type</th>
+                    <th className="pb-3 px-4 text-right">Sum Assured</th>
+                    <th className="pb-3 pl-4 text-right">Initial Premium</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-slate-500">Loading insurance activity...</td>
+                    </tr>
+                  ) : !stats.recentInsuranceActivity || stats.recentInsuranceActivity.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-slate-500">No recent insurance entries.</td>
+                    </tr>
+                  ) : (
+                    stats.recentInsuranceActivity.map((item: { _id?: string; contributionDate?: string; officialId?: { name?: string; office?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number }, idx: number) => (
+                      <tr key={item._id || `ins-${idx}`} className="hover:bg-white/3 transition-colors">
+                        <td className="py-3 pr-4 text-slate-300 font-mono">
+                          {item.contributionDate ? new Date(item.contributionDate).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td className="py-3 px-4 text-white font-medium">
+                          {item.officialId?.name || 'Unknown'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-400">
+                          {item.officeOfIndexing || item.officialId?.office || 'N/A'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            item.insuranceType === 'PLI'
+                              ? 'bg-blue-500/10 text-blue-300 border-blue-500/20'
+                              : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                          }`}>
+                            {item.insuranceType || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right font-medium text-slate-200">
+                          {formatCurrency(item.sumAssured || 0)}
+                        </td>
+                        <td className="py-3 pl-4 text-right font-bold text-emerald-400">
+                          {formatCurrency(item.initialPremium || 0)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Account Types Breakdown Widget */}
           <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <h3 className="font-semibold text-white text-lg mb-4">Account Product Distribution</h3>
@@ -245,7 +382,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right 1 Column: Top Officials Leaderboard */}
+        {/* Right 1 Column: Top Officials Leaderboard & Reports Shortcut */}
         <div className="space-y-6">
           {/* Top Officials Leaderboard */}
           <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
@@ -291,15 +428,15 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Quick Info & Help Card */}
+          {/* Quick Info & Download Reports Card */}
           <div className="dash-widget bg-linear-to-br from-indigo-950/40 to-slate-950/60 border border-indigo-500/20 rounded-3xl p-6 backdrop-blur-md">
-            <h4 className="font-semibold text-indigo-300 text-sm mb-2">Management Quick Tip</h4>
+            <h4 className="font-semibold text-indigo-300 text-sm mb-2">Download Analytics & Reports</h4>
             <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              Regularly record business contributions for officials to track monthly quota achievements and generate accurate analytics reports.
+              Export comprehensive CSV reports for both account contributions and PLI/RPLI insurance particulars for official record keeping.
             </p>
             <Link href="/dashboard/reports">
-              <Button size="sm" variant="outline" className="w-full border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 text-xs">
-                Explore Analytics Reports
+              <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md shadow-indigo-600/20">
+                <BarChart2 className="w-4 h-4 mr-1.5" /> Download Reports
               </Button>
             </Link>
           </div>
@@ -308,3 +445,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
