@@ -214,9 +214,15 @@ export function ContributionsTable() {
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     manualSorting: true,
+    manualPagination: true,
+    pageCount: data?.data?.pagination?.totalPages || 1,
     enableMultiSort: true,
     state: {
       sorting,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
     },
   });
 

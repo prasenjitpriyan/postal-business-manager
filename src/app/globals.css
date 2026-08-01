@@ -127,6 +127,16 @@
   html {
     @apply font-sans scroll-smooth;
   }
+
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  a,
+  select {
+    cursor: pointer !important;
+  }
 }
 
 /* Custom Scrollbar Styles */
