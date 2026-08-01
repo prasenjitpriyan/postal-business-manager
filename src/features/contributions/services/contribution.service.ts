@@ -3,6 +3,10 @@ import { Official } from '@/models/Official';
 import { GetContributionsQuery } from '@/types/contribution';
 import mongoose from 'mongoose';
 
+function escapeRegex(str: string): string {
+  return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 export class ContributionService {
   static async getContributions(queryOptions: GetContributionsQuery) {
     const page = queryOptions.page || 1;
@@ -143,23 +147,56 @@ export class ContributionService {
   }
 
   static async createContribution(data: Record<string, unknown>) {
-    // Basic duplicate check (same official, date, and account type)
-    const exists = await BusinessContribution.findOne({
-      officialId: data.officialId as string,
+    const contributeOffice = (data.contributeOffice as string)?.trim();
+    const accountType = (data.accountType as string)?.trim();
+    const officialId = new mongoose.Types.ObjectId(data.officialId as string);
+
+    const filter: Record<string, unknown> = {
+      officialId,
       contributionDate: new Date(data.contributionDate as string),
-      accountType: data.accountType as string
-    });
+      accountType: accountType
+        ? { $regex: `^${escapeRegex(accountType)}$`, $options: 'i' }
+        : (data.accountType as string),
+      contributeOffice: contributeOffice
+        ? { $regex: `^${escapeRegex(contributeOffice)}$`, $options: 'i' }
+        : (data.contributeOffice as string),
+    };
+
+    // Duplicate check includes contributeOffice so an official can contribute in different offices on the same date
+    const exists = await BusinessContribution.findOne(filter);
     
     if (exists) {
-      throw new Error(`Contribution for ${data.accountType} on this date already exists for this official.`);
+      throw new Error(`Contribution for ${data.accountType} at ${data.contributeOffice} on this date already exists for this official.`);
     }
 
     return await BusinessContribution.create(data);
   }
 
   static async updateContribution(id: string, data: Record<string, unknown>) {
+    const existing = await BusinessContribution.findById(id);
+    if (!existing) throw new Error('Contribution not found');
+
+    const officialIdStr = (data.officialId as string) || existing.officialId.toString();
+    const officialId = new mongoose.Types.ObjectId(officialIdStr);
+    const contributionDate = data.contributionDate ? new Date(data.contributionDate as string) : existing.contributionDate;
+    const accountType = ((data.accountType as string) || existing.accountType).trim();
+    const contributeOffice = ((data.contributeOffice as string) || existing.contributeOffice).trim();
+
+    const filter: Record<string, unknown> = {
+      _id: { $ne: new mongoose.Types.ObjectId(id) },
+      officialId,
+      contributionDate,
+      accountType: { $regex: `^${escapeRegex(accountType)}$`, $options: 'i' },
+      contributeOffice: { $regex: `^${escapeRegex(contributeOffice)}$`, $options: 'i' },
+    };
+
+    const duplicate = await BusinessContribution.findOne(filter);
+
+    if (duplicate) {
+      throw new Error(`Contribution for ${accountType} at ${contributeOffice} on this date already exists for this official.`);
+    }
+
     const contribution = await BusinessContribution.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
-    if (!contribution) throw new Error('Contribution not found');
     return contribution;
   }
 

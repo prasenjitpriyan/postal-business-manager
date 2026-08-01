@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-import { Users, FileText, Home, LogOut, Menu, Box } from 'lucide-react';
+import { Users, FileText, Home, LogOut, Menu, Box, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -123,6 +123,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Link href="/dashboard/contributions" onClick={() => setIsMobileMenuOpen(false)} className="dashboard-nav-item group flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/5">
             <FileText className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
             <span className="font-medium">Contributions</span>
+          </Link>
+          <Link href="/dashboard/insurance" onClick={() => setIsMobileMenuOpen(false)} className="dashboard-nav-item group flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/5">
+            <ShieldCheck className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
+            <span className="font-medium">Insurance (PLI/RPLI)</span>
           </Link>
           <Link href="/dashboard/reports" onClick={() => setIsMobileMenuOpen(false)} className="dashboard-nav-item group flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/5">
             <FileText className="w-5 h-5 group-hover:text-blue-400 transition-colors" />

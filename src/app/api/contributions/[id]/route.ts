@@ -37,6 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return successResponse(contribution, 'Contribution updated successfully');
   } catch (error: unknown) {
     if ((error as Error).message === 'Contribution not found') return errorResponse((error as Error).message, 404);
+    if ((error as Error).message.includes('already exists')) return errorResponse((error as Error).message, 409);
     return errorResponse((error as Error).message, 500);
   }
 }

@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Zap, Users, MapPin, TrendingUp, Plus, BarChart2, ArrowRight, Award, Clock, ChevronRight } from 'lucide-react';
+import { Zap, Users, MapPin, TrendingUp, Plus, BarChart2, ArrowRight, Award, Clock, ChevronRight, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="dash-header-text flex flex-wrap items-center gap-3">
+          <Link href="/dashboard/insurance">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-md shadow-emerald-600/20">
+              <ShieldCheck className="w-4 h-4 mr-1.5" /> PLI / RPLI Insurance
+            </Button>
+          </Link>
           <Link href="/dashboard/contributions">
             <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-md shadow-indigo-600/20">
               <Plus className="w-4 h-4 mr-1.5" /> Add Contribution
