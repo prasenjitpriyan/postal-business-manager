@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const ChartSkeleton = () => (
   <div className="flex flex-col items-center justify-center h-80 w-full bg-slate-950/40 rounded-xl border border-white/5 animate-pulse space-y-3">

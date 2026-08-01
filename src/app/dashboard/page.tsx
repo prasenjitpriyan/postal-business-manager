@@ -9,7 +9,9 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function DashboardPage() {
   const container = useRef<HTMLDivElement>(null);

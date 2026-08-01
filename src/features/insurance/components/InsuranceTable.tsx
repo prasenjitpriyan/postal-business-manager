@@ -29,7 +29,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { toast } from 'sonner';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const AddInsuranceDialog = dynamic(
   () => import('./AddInsuranceDialog').then((mod) => mod.AddInsuranceDialog),

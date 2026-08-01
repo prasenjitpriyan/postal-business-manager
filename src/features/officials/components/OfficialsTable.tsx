@@ -27,7 +27,9 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react'
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const AddOfficialDialog = dynamic(
   () => import('./AddOfficialDialog').then((mod) => mod.AddOfficialDialog),
