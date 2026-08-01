@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
@@ -26,6 +26,7 @@ import { BusinessContribution } from '@/types/contribution';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -47,6 +48,8 @@ const DeleteContributionDialog = dynamic(
 
 export function ContributionsTable() {
   'use no memo';
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'Admin';
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
@@ -88,12 +91,7 @@ export function ContributionsTable() {
               scale: 1,
               duration: 0.45,
               stagger: 0.05,
-              ease: 'back.out(1.2)',
-              scrollTrigger: {
-                trigger: tableContainerRef.current,
-                start: 'top 88%',
-                toggleActions: 'play none none none',
-              }
+              ease: 'power2.out',
             }
           );
         }
@@ -102,109 +100,108 @@ export function ContributionsTable() {
     { scope: tableContainerRef, dependencies: [data, isLoading] }
   );
 
-  const columns: ColumnDef<BusinessContribution>[] = [
-    {
-      accessorKey: 'contributionDate',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Date
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        );
+  const columns: ColumnDef<BusinessContribution>[] = useMemo(() => {
+    const cols: ColumnDef<BusinessContribution>[] = [
+      {
+        accessorKey: 'officialId.name',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Official
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const official = row.original.officialId;
+          return typeof official === 'object' && official?.name ? official.name : 'N/A';
+        },
       },
-      cell: ({ row }) => new Date(row.getValue('contributionDate')).toLocaleDateString(),
-    },
-    {
-      accessorKey: 'officialId.name',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Official
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        );
+      {
+        accessorKey: 'contributeOffice',
+        header: 'Office',
+        cell: ({ row }) => row.getValue('contributeOffice') || 'N/A',
       },
-      cell: ({ row }) => (row.original.officialId as { name?: string })?.name || 'Unknown',
-    },
-    {
-      accessorKey: 'contributeOffice',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Office
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        );
+      {
+        accessorKey: 'contributionDate',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Date
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          );
+        },
+        cell: ({ row }) =>
+          new Date(row.getValue('contributionDate')).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
       },
-    },
-    {
-      accessorKey: 'accountType',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Type
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        );
+      {
+        accessorKey: 'accountType',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Type
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          );
+        },
       },
-    },
-    {
-      accessorKey: 'accountsOpened',
-      header: 'Accounts Opened',
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        return (
-          <div className="flex gap-2">
-            <EditContributionDialog contribution={row.original} />
-            <DeleteContributionDialog contributionId={row.original._id} />
-          </div>
-        );
+      {
+        accessorKey: 'accountsOpened',
+        header: 'Accounts Opened',
       },
-    },
-  ];
+    ];
+
+    if (isAdmin) {
+      cols.push({
+        id: 'actions',
+        cell: ({ row }) => {
+          return (
+            <div className="flex gap-2">
+              <EditContributionDialog contribution={row.original} />
+              <DeleteContributionDialog contributionId={row.original._id} />
+            </div>
+          );
+        },
+      });
+    }
+
+    return cols;
+  }, [isAdmin, sorting]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -253,7 +250,13 @@ export function ContributionsTable() {
             />
           </div>
         </div>
-        <AddContributionDialog />
+        {isAdmin ? (
+          <AddContributionDialog />
+        ) : (
+          <span className="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-slate-400 font-medium">
+            Read-Only Mode (Viewer)
+          </span>
+        )}
       </div>
 
       <div ref={tableContainerRef} className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">

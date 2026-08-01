@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export enum Role {
   ADMIN = 'Admin',
-  SUPERVISOR = 'Supervisor',
   VIEWER = 'Viewer',
 }
 

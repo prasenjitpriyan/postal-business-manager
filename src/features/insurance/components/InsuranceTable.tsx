@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
@@ -29,6 +29,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { toast } from 'sonner';
 
+import { useAuthStore } from '@/store/useAuthStore';
+
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -48,6 +50,9 @@ const DeleteInsuranceDialog = dynamic(
 
 export function InsuranceTable() {
   'use no memo';
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'Admin';
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
@@ -161,157 +166,176 @@ export function InsuranceTable() {
     }).format(amount || 0);
   };
 
-  const columns: ColumnDef<InsuranceContribution>[] = [
-    {
-      accessorKey: 'contributionDate',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          Date
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <span className="font-mono text-xs text-slate-300">
-          {new Date(row.getValue('contributionDate')).toLocaleDateString('en-IN')}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'officialId.name',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          Official
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const official = row.original.officialId as { name?: string; designation?: string };
-        return (
-          <div>
-            <div className="font-medium text-white text-sm">{official?.name || 'Unknown'}</div>
-            {official?.designation && (
-              <div className="text-[11px] text-slate-400">{official.designation}</div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'officeOfIndexing',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          Office of Indexing
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <span className="text-slate-300 text-sm font-medium">{row.getValue('officeOfIndexing')}</span>
-      ),
-    },
-    {
-      accessorKey: 'insuranceType',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          PLI / RPLI
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const type = row.getValue('insuranceType') as string;
-        const isPLI = type === 'PLI';
-        return (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-              isPLI
-                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-            }`}
+  const columns: ColumnDef<InsuranceContribution>[] = useMemo(() => {
+    const cols: ColumnDef<InsuranceContribution>[] = [
+      {
+        accessorKey: 'contributionDate',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
           >
-            {type}
+            Date
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-slate-300 text-xs sm:text-sm">
+            {new Date(row.getValue('contributionDate')).toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            })}
           </span>
-        );
+        ),
       },
-    },
-    {
-      accessorKey: 'sumAssured',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          Sum Assured
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <span className="font-semibold text-white text-sm">
-          {formatCurrency(row.getValue('sumAssured'))}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'initialPremium',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={(e) => column.toggleSorting(column.getIsSorted() === 'asc', e.shiftKey)}
-          className="-ml-4 hover:bg-white/5 hover:text-white"
-        >
-          Initial Premium
-          {{
-            asc: <ArrowUp className="ml-2 h-4 w-4" />,
-            desc: <ArrowDown className="ml-2 h-4 w-4" />,
-          }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <span className="font-semibold text-emerald-400 text-sm">
-          {formatCurrency(row.getValue('initialPremium'))}
-        </span>
-      ),
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <EditInsuranceDialog contribution={row.original} />
-          <DeleteInsuranceDialog id={row.original._id} />
-        </div>
-      ),
-    },
-  ];
+      {
+        accessorKey: 'officialId.name',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Official
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const official = row.original.officialId;
+          const name = typeof official === 'object' && official?.name ? official.name : 'N/A';
+          const designation = typeof official === 'object' && official?.designation ? official.designation : '-';
+          return (
+            <div>
+              <p className="font-semibold text-white text-sm">{name}</p>
+              <p className="text-[11px] text-slate-400">{designation}</p>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'officeOfIndexing',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Office of Indexing
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+            {column.getSortIndex() !== -1 && sorting.length > 1 && (
+              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+            )}
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="text-slate-300 text-xs sm:text-sm font-medium">{row.getValue('officeOfIndexing')}</span>
+        ),
+      },
+      {
+        accessorKey: 'insuranceType',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Type
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const type = row.getValue('insuranceType') as InsuranceType;
+          return (
+            <span
+              className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1 ${
+                type === 'PLI'
+                  ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+              }`}
+            >
+              {type}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: 'sumAssured',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Sum Assured
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="font-semibold text-slate-100 text-sm">
+            {formatCurrency(row.getValue('sumAssured'))}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'initialPremium',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4 hover:bg-white/5 hover:text-white"
+          >
+            Initial Premium
+            {{
+              asc: <ArrowUp className="ml-2 h-4 w-4" />,
+              desc: <ArrowDown className="ml-2 h-4 w-4" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="font-semibold text-emerald-400 text-sm">
+            {formatCurrency(row.getValue('initialPremium'))}
+          </span>
+        ),
+      },
+    ];
+
+    if (isAdmin) {
+      cols.push({
+        id: 'actions',
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-1">
+            <EditInsuranceDialog contribution={row.original} />
+            <DeleteInsuranceDialog id={row.original._id} />
+          </div>
+        ),
+      });
+    }
+
+    return cols;
+  }, [isAdmin, sorting]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -449,7 +473,13 @@ export function InsuranceTable() {
           >
             <Download className="w-4 h-4 mr-2" /> Export CSV
           </Button>
-          <AddInsuranceDialog />
+          {isAdmin ? (
+            <AddInsuranceDialog />
+          ) : (
+            <span className="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-slate-400 font-medium">
+              Read-Only Mode (Viewer)
+            </span>
+          )}
         </div>
       </div>
 

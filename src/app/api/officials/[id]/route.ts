@@ -27,8 +27,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await dbConnect();
     
     const session = await getAuthSession(req);
-    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPERVISOR)) {
-      return errorResponse('Forbidden', 403);
+    if (!session || session.role !== Role.ADMIN) {
+      return errorResponse('Forbidden. Admin permissions required.', 403);
     }
 
     const body = await req.json();

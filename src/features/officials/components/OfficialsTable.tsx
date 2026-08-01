@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,7 @@ import {
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react'
+import { useAuthStore } from '@/store/useAuthStore'
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -46,6 +47,9 @@ const DeleteOfficialDialog = dynamic(
 
 export function OfficialsTable() {
   'use no memo';
+  const user = useAuthStore((state) => state.user)
+  const isAdmin = user?.role === 'Admin'
+
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [search, setSearch] = useState('')
@@ -80,12 +84,7 @@ export function OfficialsTable() {
               scale: 1,
               duration: 0.45,
               stagger: 0.05,
-              ease: 'back.out(1.2)',
-              scrollTrigger: {
-                trigger: tableContainerRef.current,
-                start: 'top 88%',
-                toggleActions: 'play none none none',
-              }
+              ease: 'power2.out',
             }
           )
         }
@@ -94,119 +93,125 @@ export function OfficialsTable() {
     { scope: tableContainerRef, dependencies: [data, isLoading] }
   )
 
-  const columns: ColumnDef<Official>[] = [
-    {
-      accessorKey: 'name',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
+  const columns: ColumnDef<Official>[] = useMemo(() => {
+    const cols: ColumnDef<Official>[] = [
+      {
+        accessorKey: 'name',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Name
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'designation',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Designation
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'facilityId',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Facility ID
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'office',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              className="-ml-4 hover:bg-white/5 hover:text-white"
+            >
+              Office
+              {{
+                asc: <ArrowUp className="ml-2 h-4 w-4" />,
+                desc: <ArrowDown className="ml-2 h-4 w-4" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
+              {column.getSortIndex() !== -1 && sorting.length > 1 && (
+                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
+              )}
+            </Button>
+          )
+        },
+      },
+      {
+        accessorKey: 'phone',
+        header: 'Phone',
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium border ${row.getValue('status') === OfficialStatus.ACTIVE ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}
           >
-            Name
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        )
+            {row.getValue('status')}
+          </span>
+        ),
       },
-    },
-    {
-      accessorKey: 'employeeId',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Employee ID
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        )
-      },
-      cell: ({ row }) => row.getValue('employeeId') || '-',
-    },
-    {
-      accessorKey: 'designation',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Designation
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        )
-      },
-    },
-    {
-      accessorKey: 'office',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={(e) => column.toggleSorting(column.getIsSorted() === "asc", e.shiftKey)}
-            className="-ml-4 hover:bg-white/5 hover:text-white"
-          >
-            Office
-            {{
-              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-            {column.getSortIndex() !== -1 && sorting.length > 1 && (
-              <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-            )}
-          </Button>
-        )
-      },
-    },
-    {
-      accessorKey: 'phone',
-      header: 'Phone',
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium border ${row.getValue('status') === OfficialStatus.ACTIVE ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}
-        >
-          {row.getValue('status')}
-        </span>
-      ),
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        return (
-          <div className="flex gap-2">
-            <EditOfficialDialog official={row.original} />
-            <DeleteOfficialDialog officialId={row.original._id} officialName={row.original.name} />
-          </div>
-        )
-      },
-    },
-  ]
+    ]
+
+    if (isAdmin) {
+      cols.push({
+        id: 'actions',
+        cell: ({ row }) => {
+          return (
+            <div className="flex gap-2">
+              <EditOfficialDialog official={row.original} />
+              <DeleteOfficialDialog officialId={row.original._id} officialName={row.original.name} />
+            </div>
+          )
+        },
+      })
+    }
+
+    return cols
+  }, [isAdmin, sorting])
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -237,7 +242,13 @@ export function OfficialsTable() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:max-w-sm"
         />
-        <AddOfficialDialog />
+        {isAdmin ? (
+          <AddOfficialDialog />
+        ) : (
+          <span className="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-slate-400 font-medium">
+            Read-Only Mode (Viewer)
+          </span>
+        )}
       </div>
 
       <div ref={tableContainerRef} className="rounded-md border border-white/10 bg-slate-950/50 backdrop-blur-sm overflow-x-auto">
