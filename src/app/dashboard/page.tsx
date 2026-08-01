@@ -521,7 +521,7 @@ export default function DashboardPage() {
                   return (
                     <div key={`ins-office-${idx}`} className="space-y-1.5 p-3 rounded-2xl bg-white/5 border border-white/5">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-white truncate max-w-[140px]">{off.office || 'N/A'}</span>
+                        <span className="font-semibold text-white truncate max-w-35">{off.office || 'N/A'}</span>
                         <span className="font-bold text-emerald-400">{formatCurrency(off.totalSumAssured || 0)}</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
