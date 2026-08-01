@@ -1,19 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
-
-const OfficialsTable = dynamic(
-  () => import('@/features/officials/components/OfficialsTable').then((mod) => mod.OfficialsTable),
-  {
-    loading: () => (
-      <div className="flex flex-col justify-center items-center h-80 space-y-4 rounded-xl bg-slate-950/40 border border-white/5 animate-pulse">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-        <p className="text-sm text-slate-400">Loading Officials Table...</p>
-      </div>
-    ),
-  }
-);
+import { OfficialsTable } from '@/features/officials/components/OfficialsTable';
 
 export default function OfficialsPage() {
   return (
