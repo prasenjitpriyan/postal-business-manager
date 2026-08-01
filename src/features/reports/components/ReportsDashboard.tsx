@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const ChartSkeleton = () => (
   <div className="flex flex-col items-center justify-center h-80 w-full bg-slate-950/40 rounded-xl border border-white/5 animate-pulse space-y-3">
     <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
@@ -67,26 +69,57 @@ export function ReportsDashboard() {
 
   useGSAP(() => {
     if (!container.current) return;
-    const tl = gsap.timeline();
 
-    tl.fromTo('.gsap-report-filter', 
+    gsap.fromTo('.gsap-report-filter', 
       { y: -15, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
-    )
-    .fromTo('.gsap-kpi-card',
+    );
+
+    gsap.fromTo('.gsap-kpi-card',
       { y: 30, opacity: 0, scale: 0.95 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.08, ease: 'back.out(1.4)' },
-      '-=0.2'
-    )
-    .fromTo('.gsap-report-tabs',
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'back.out(1.4)',
+        scrollTrigger: {
+          trigger: '.gsap-kpi-card',
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    gsap.fromTo('.gsap-report-tabs',
       { y: 15, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' },
-      '-=0.2'
-    )
-    .fromTo('.gsap-tab-content',
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.4,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.gsap-report-tabs',
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    gsap.fromTo('.gsap-tab-content',
       { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' },
-      '-=0.1'
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.4,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.gsap-tab-content',
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        }
+      }
     );
   }, { scope: container });
 

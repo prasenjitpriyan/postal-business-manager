@@ -23,8 +23,11 @@ import {
   useReactTable,
   SortingState,
 } from '@tanstack/react-table'
-import { gsap } from 'gsap'
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react'
+
+gsap.registerPlugin(ScrollTrigger);
 
 const AddOfficialDialog = dynamic(
   () => import('./AddOfficialDialog').then((mod) => mod.AddOfficialDialog),
@@ -40,13 +43,13 @@ const DeleteOfficialDialog = dynamic(
 )
 
 export function OfficialsTable() {
+  'use no memo';
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
-  // Use React Query for fetching
-  const fetchOfficials = async (page: number, search: string, sortParams: string) => {
+  const fetchOfficials = async (page: number, search: string, sortParams: string): Promise<{ data: { officials: Official[], pagination: { totalPages: number } } }> => {
     const res = await fetch(`/api/officials?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`)
     if (!res.ok) throw new Error('Network response was not ok')
     return res.json()
@@ -67,7 +70,19 @@ export function OfficialsTable() {
           gsap.fromTo(
             rows,
             { opacity: 0, y: 15, scale: 0.98 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(1.2)' }
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.45,
+              stagger: 0.05,
+              ease: 'back.out(1.2)',
+              scrollTrigger: {
+                trigger: tableContainerRef.current,
+                start: 'top 88%',
+                toggleActions: 'play none none none',
+              }
+            }
           )
         }
       }

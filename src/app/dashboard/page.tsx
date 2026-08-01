@@ -2,11 +2,14 @@
 
 import { useRef } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Zap, Users, MapPin, TrendingUp, Plus, BarChart2, ArrowRight, Award, Clock, ChevronRight, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function DashboardPage() {
   const container = useRef<HTMLDivElement>(null);
@@ -49,22 +52,35 @@ export default function DashboardPage() {
   };
 
   useGSAP(() => {
-    const tl = gsap.timeline();
-
-    tl.fromTo('.dash-header-text', 
+    // Header text & initial KPI cards animate on load
+    gsap.fromTo('.dash-header-text', 
       { y: 25, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out' }
-    )
-    .fromTo('.dash-metric-card',
-      { y: 40, opacity: 0, rotateX: -10, transformOrigin: "50% 100%" },
-      { y: 0, opacity: 1, rotateX: 0, duration: 0.6, stagger: 0.1, ease: 'back.out(1.4)' },
-      '-=0.2'
-    )
-    .fromTo('.dash-widget',
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.5, stagger: 0.12, ease: 'power2.out' },
-      '-=0.3'
     );
+
+    gsap.fromTo('.dash-metric-card',
+      { y: 40, opacity: 0, rotateX: -10, transformOrigin: "50% 100%" },
+      { y: 0, opacity: 1, rotateX: 0, duration: 0.6, stagger: 0.1, ease: 'back.out(1.4)' }
+    );
+
+    // Scroll-triggered animations for all widgets further down the page
+    const widgets = container.current?.querySelectorAll('.dash-widget');
+    widgets?.forEach((widget) => {
+      gsap.fromTo(widget,
+        { y: 35, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: widget,
+            start: 'top 88%',
+            toggleActions: 'play none none none',
+          }
+        }
+      );
+    });
 
     gsap.to('.dash-icon-bg', {
       scale: 1.05,

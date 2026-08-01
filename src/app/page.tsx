@@ -5,14 +5,15 @@ import Link from 'next/link';
 import { ArrowRight, Box, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function LandingPage() {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const tl = gsap.timeline();
-
     // Floating backgrounds
     gsap.to('.bg-orb-1', {
       y: 'random(-50, 50)',
@@ -34,7 +35,8 @@ export default function LandingPage() {
     });
 
     // SVG Line Drawing Animation
-    tl.to('.svg-path', {
+    const svgTl = gsap.timeline();
+    svgTl.to('.svg-path', {
       strokeDashoffset: 0,
       duration: 2.5,
       ease: 'power2.inOut',
@@ -50,8 +52,9 @@ export default function LandingPage() {
       ease: 'sine.inOut'
     }, 1.5);
 
-    // Initial sequence
-    tl.fromTo('header', 
+    // Initial Hero Sequence
+    const heroTl = gsap.timeline();
+    heroTl.fromTo('header', 
       { y: -20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' },
       0
@@ -66,7 +69,6 @@ export default function LandingPage() {
       { scale: 1, y: 0, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' },
       0.4
     )
-    // Advanced 3D staggered text reveal for title
     .fromTo('.hero-word', 
       { y: 50, opacity: 0, rotateX: -90, transformOrigin: "0% 50% -50" },
       { y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.1, ease: 'back.out(1.5)' },
@@ -81,21 +83,56 @@ export default function LandingPage() {
       { scale: 0.5, opacity: 0 },
       { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.5)' },
       1.3
-    )
-    .fromTo('.feature-card', 
+    );
+
+    // Scroll Triggered Feature Cards
+    gsap.fromTo('.feature-card',
       { y: 50, opacity: 0, scale: 0.95 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.7, stagger: 0.15, ease: 'power3.out' },
-      1.5
-    )
-    .fromTo('footer', 
-      { opacity: 0 },
-      { opacity: 1, duration: 0.8, ease: 'power3.out' },
-      1.8
-    )
-    .fromTo(['.footer-brand', '.footer-text', '.footer-link'],
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.7,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.feature-cards-container',
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    // Scroll Triggered Footer
+    gsap.fromTo('footer',
+      { y: 30, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: 'footer',
+          start: 'top 95%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    gsap.fromTo(['.footer-brand', '.footer-text', '.footer-link'],
       { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.5)' },
-      2.0
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'back.out(1.5)',
+        scrollTrigger: {
+          trigger: 'footer',
+          start: 'top 95%',
+          toggleActions: 'play none none none',
+        }
+      }
     );
 
     // Continuous floating animation for the badge

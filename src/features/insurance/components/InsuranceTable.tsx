@@ -25,8 +25,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck, IndianRupee, FileCheck, Layers, Download } from 'lucide-react';
 import { InsuranceContribution, InsuranceType } from '@/types/insurance';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { toast } from 'sonner';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const AddInsuranceDialog = dynamic(
   () => import('./AddInsuranceDialog').then((mod) => mod.AddInsuranceDialog),
@@ -119,7 +122,6 @@ export function InsuranceTable() {
     }
   };
 
-
   useGSAP(
     () => {
       if (!isLoading && data?.data?.contributions && data.data.contributions.length > 0) {
@@ -128,7 +130,19 @@ export function InsuranceTable() {
           gsap.fromTo(
             rows,
             { opacity: 0, y: 15, scale: 0.98 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.04, ease: 'back.out(1.2)' }
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.45,
+              stagger: 0.04,
+              ease: 'back.out(1.2)',
+              scrollTrigger: {
+                trigger: tableContainerRef.current,
+                start: 'top 88%',
+                toggleActions: 'play none none none',
+              }
+            }
           );
         }
       }

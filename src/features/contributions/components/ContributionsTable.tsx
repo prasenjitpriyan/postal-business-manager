@@ -24,7 +24,10 @@ import {
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BusinessContribution } from '@/types/contribution';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const AddContributionDialog = dynamic(
   () => import('./AddContributionDialog').then((mod) => mod.AddContributionDialog),
@@ -46,16 +49,17 @@ export function ContributionsTable() {
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'officialId.name', desc: false }]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'contributionDate', desc: true }]);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
-  const fetchContributions = async (page: number, search: string, startDate: string, endDate: string, sortParams: string): Promise<{ data: { contributions: BusinessContribution[], pagination: { totalPages: number } } }> => {
-    let url = `/api/contributions?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`;
+  const fetchContributions = async (page: number, search: string, startDate?: string, endDate?: string, sort?: string) => {
+    let url = `/api/contributions?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
+    if (sort) url += `&sort=${encodeURIComponent(sort)}`;
 
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Network response was not ok');
+    if (!res.ok) throw new Error('Failed to fetch contributions');
     return res.json();
   };
 
@@ -75,7 +79,19 @@ export function ContributionsTable() {
           gsap.fromTo(
             rows,
             { opacity: 0, y: 15, scale: 0.98 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(1.2)' }
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.45,
+              stagger: 0.05,
+              ease: 'back.out(1.2)',
+              scrollTrigger: {
+                trigger: tableContainerRef.current,
+                start: 'top 88%',
+                toggleActions: 'play none none none',
+              }
+            }
           );
         }
       }
