@@ -87,55 +87,37 @@ export default function LandingPage() {
       1.3
     );
 
-    // Scroll Triggered Feature Cards
-    gsap.fromTo('.feature-card',
-      { y: 50, opacity: 0, scale: 0.95 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.feature-cards-container',
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        }
-      }
-    );
+    // Scroll Triggered Feature Cards & Footer using IntersectionObserver
+    if (container.current) {
+      const cards = container.current.querySelectorAll('.feature-card');
+      const footerElements = container.current.querySelectorAll('footer, .footer-brand, .footer-text, .footer-link');
 
-    // Scroll Triggered Footer
-    gsap.fromTo('footer',
-      { y: 30, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: 'footer',
-          start: 'top 95%',
-          toggleActions: 'play none none none',
-        }
-      }
-    );
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            gsap.to(entry.target, {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.6,
+              ease: 'power3.out',
+              overwrite: 'auto'
+            });
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
 
-    gsap.fromTo(['.footer-brand', '.footer-text', '.footer-link'],
-      { y: 20, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: 'back.out(1.5)',
-        scrollTrigger: {
-          trigger: 'footer',
-          start: 'top 95%',
-          toggleActions: 'play none none none',
-        }
-      }
-    );
+      cards.forEach((card) => {
+        gsap.set(card, { y: 40, opacity: 0, scale: 0.95 });
+        observer.observe(card);
+      });
+
+      footerElements.forEach((el) => {
+        gsap.set(el, { y: 20, opacity: 0 });
+        observer.observe(el);
+      });
+    }
 
     // Continuous floating animation for the badge
     gsap.to('.hero-badge', {

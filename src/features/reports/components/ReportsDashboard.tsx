@@ -93,46 +93,39 @@ export function ReportsDashboard() {
       { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
     );
 
-    gsap.fromTo('.gsap-kpi-card',
-      { y: 30, opacity: 0, scale: 0.95 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.08,
-        ease: 'back.out(1.4)',
-        scrollTrigger: {
-          trigger: '.gsap-kpi-card',
-          start: 'top 92%',
-          toggleActions: 'play none none none',
-        }
-      }
-    );
-
     gsap.fromTo('.gsap-report-tabs',
       { y: 15, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.4,
-        ease: 'power2.out',
-      }
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
     );
 
     gsap.fromTo('.gsap-tab-content',
       { y: 20, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.4,
-        ease: 'power2.out',
-      }
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
     );
 
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
+    const kpiCards = container.current.querySelectorAll('.gsap-kpi-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          gsap.to(entry.target, {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            ease: 'back.out(1.2)',
+            overwrite: 'auto'
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+    kpiCards.forEach((card) => {
+      gsap.set(card, { y: 25, opacity: 0, scale: 0.96 });
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
 
   }, { scope: container, dependencies: [data, isLoading, activeTab] });
 

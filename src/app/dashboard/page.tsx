@@ -54,7 +54,7 @@ export default function DashboardPage() {
   };
 
   useGSAP(() => {
-    if (isLoading) return;
+    if (isLoading || !container.current) return;
 
     // Header text & initial KPI cards animate on load
     gsap.fromTo('.dash-header-text', 
@@ -63,27 +63,31 @@ export default function DashboardPage() {
     );
 
     gsap.fromTo('.dash-metric-card',
-      { y: 30, opacity: 0, rotateX: -5 },
-      { y: 0, opacity: 1, rotateX: 0, duration: 0.5, stagger: 0.08, ease: 'back.out(1.4)' }
+      { y: 25, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'back.out(1.2)' }
     );
 
-    // Scroll-triggered animations for all widgets further down the page
-    const widgets = container.current?.querySelectorAll('.dash-widget');
-    widgets?.forEach((widget) => {
-      gsap.fromTo(widget,
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: widget,
-            start: 'top 92%',
-            toggleActions: 'play none none none',
-          }
+    // Scroll-triggered animations for widgets as they enter viewport
+    const widgets = container.current.querySelectorAll('.dash-widget');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          gsap.to(entry.target, {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+          observer.unobserve(entry.target);
         }
-      );
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+    widgets.forEach((widget) => {
+      gsap.set(widget, { y: 30, opacity: 0 });
+      observer.observe(widget);
     });
 
     gsap.to('.dash-icon-bg', {
@@ -94,9 +98,7 @@ export default function DashboardPage() {
       ease: 'sine.inOut'
     });
 
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
+    return () => observer.disconnect();
 
   }, { scope: container, dependencies: [data, isLoading] });
 
