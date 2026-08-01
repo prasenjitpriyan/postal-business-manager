@@ -474,7 +474,7 @@ export function InsuranceTable() {
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="gsap-table-row opacity-0 hover:bg-white/5">
+                <TableRow key={row.id} className="gsap-table-row hover:bg-white/5">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

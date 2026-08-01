@@ -256,7 +256,7 @@ export function OfficialsTable() {
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="gsap-table-row opacity-0">
+                <TableRow key={row.id} className="gsap-table-row">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

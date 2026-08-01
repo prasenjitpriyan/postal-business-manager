@@ -70,8 +70,23 @@ export function ReportsDashboard() {
     setActiveTab(tab);
   };
 
+  const { data, isLoading } = useQuery({
+    queryKey: ['reports-summary', startDate, endDate],
+    queryFn: async () => {
+      let url = '/api/reports/summary';
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (params.toString()) url += `?${params.toString()}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch summary');
+      return res.json();
+    }
+  });
+
   useGSAP(() => {
-    if (!container.current) return;
+    if (!container.current || isLoading) return;
 
     gsap.fromTo('.gsap-report-filter', 
       { y: -15, opacity: 0 },
@@ -89,7 +104,7 @@ export function ReportsDashboard() {
         ease: 'back.out(1.4)',
         scrollTrigger: {
           trigger: '.gsap-kpi-card',
-          start: 'top 88%',
+          start: 'top 92%',
           toggleActions: 'play none none none',
         }
       }
@@ -102,11 +117,6 @@ export function ReportsDashboard() {
         opacity: 1,
         duration: 0.4,
         ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.gsap-report-tabs',
-          start: 'top 90%',
-          toggleActions: 'play none none none',
-        }
       }
     );
 
@@ -117,14 +127,14 @@ export function ReportsDashboard() {
         opacity: 1,
         duration: 0.4,
         ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.gsap-tab-content',
-          start: 'top 88%',
-          toggleActions: 'play none none none',
-        }
       }
     );
-  }, { scope: container });
+
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+  }, { scope: container, dependencies: [data, isLoading, activeTab] });
 
   const handlePresetChange = (selected: 'all' | '30d' | '90d' | 'custom') => {
     setPreset(selected);
@@ -144,21 +154,6 @@ export function ReportsDashboard() {
       setEndDate(today.toISOString().split('T')[0]);
     }
   };
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['reports-summary', startDate, endDate],
-    queryFn: async () => {
-      let url = '/api/reports/summary';
-      const params = new URLSearchParams();
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
-      if (params.toString()) url += `?${params.toString()}`;
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch summary');
-      return res.json();
-    }
-  });
 
   const summary = data?.data || {
     totalAccounts: 0,

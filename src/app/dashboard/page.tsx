@@ -54,30 +54,32 @@ export default function DashboardPage() {
   };
 
   useGSAP(() => {
+    if (isLoading) return;
+
     // Header text & initial KPI cards animate on load
     gsap.fromTo('.dash-header-text', 
-      { y: 25, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out' }
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'power3.out' }
     );
 
     gsap.fromTo('.dash-metric-card',
-      { y: 40, opacity: 0, rotateX: -10, transformOrigin: "50% 100%" },
-      { y: 0, opacity: 1, rotateX: 0, duration: 0.6, stagger: 0.1, ease: 'back.out(1.4)' }
+      { y: 30, opacity: 0, rotateX: -5 },
+      { y: 0, opacity: 1, rotateX: 0, duration: 0.5, stagger: 0.08, ease: 'back.out(1.4)' }
     );
 
     // Scroll-triggered animations for all widgets further down the page
     const widgets = container.current?.querySelectorAll('.dash-widget');
     widgets?.forEach((widget) => {
       gsap.fromTo(widget,
-        { y: 35, opacity: 0 },
+        { y: 30, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.6,
+          duration: 0.5,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: widget,
-            start: 'top 88%',
+            start: 'top 92%',
             toggleActions: 'play none none none',
           }
         }
@@ -92,7 +94,11 @@ export default function DashboardPage() {
       ease: 'sine.inOut'
     });
 
-  }, { scope: container });
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+  }, { scope: container, dependencies: [data, isLoading] });
 
   return (
     <div ref={container} className="space-y-8">
