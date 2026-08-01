@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles } from 'lucide-react';
+import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PostalLogo } from '@/components/brand/PostalLogo';
 import { gsap } from 'gsap';
@@ -90,6 +90,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { href: '/dashboard/insurance', label: 'Insurance (PLI/RPLI)', icon: ShieldCheck },
     { href: '/dashboard/reports', label: 'Reports & Analytics', icon: BarChart3 },
   ];
+
+  if (user?.role === 'Admin') {
+    navItems.push({ href: '/dashboard/users', label: 'User Access Control', icon: UserCog });
+  }
 
   return (
     <div ref={container} className="dark flex h-screen bg-slate-950 text-slate-50 relative overflow-hidden font-sans">
