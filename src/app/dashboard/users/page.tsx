@@ -241,7 +241,7 @@ export default function UserManagementPage() {
                     <TableRow key={u._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                       <TableCell className="font-semibold text-white">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
+                          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
                             {u.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
