@@ -49,6 +49,7 @@ const DeleteInsuranceDialog = dynamic(
 export function InsuranceTable() {
   'use no memo';
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -57,7 +58,7 @@ export function InsuranceTable() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchInsurance = async () => {
-    let url = `/api/insurance?page=${page}&limit=10&search=${encodeURIComponent(search)}&sort=${encodeURIComponent(JSON.stringify(sorting))}`;
+    let url = `/api/insurance?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&sort=${encodeURIComponent(JSON.stringify(sorting))}`;
     if (startDate) url += `&startDate=${startDate}`;
     if (endDate) url += `&endDate=${endDate}`;
     if (typeFilter !== 'ALL') url += `&insuranceType=${typeFilter}`;
@@ -70,7 +71,7 @@ export function InsuranceTable() {
   const sortParams = JSON.stringify(sorting);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['insuranceContributions', page, search, startDate, endDate, typeFilter, sortParams],
+    queryKey: ['insuranceContributions', page, limit, search, startDate, endDate, typeFilter, sortParams],
     queryFn: fetchInsurance,
     placeholderData: keepPreviousData,
   });
@@ -494,28 +495,48 @@ export function InsuranceTable() {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-end space-x-2 py-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
-          className="border-white/10 text-slate-300 hover:bg-white/10"
-        >
-          Previous
-        </Button>
-        <div className="text-xs text-slate-400">
-          Page {page} of {data?.data?.pagination?.totalPages || 1}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3">
+        <div className="flex items-center space-x-2 text-xs sm:text-sm text-slate-400">
+          <span>Rows per page:</span>
+          <select
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setPage(1);
+            }}
+            className="bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+          >
+            {[10, 20, 30, 50, 100].map((pageSize) => (
+              <option key={pageSize} value={pageSize} className="bg-slate-900 text-white">
+                {pageSize}
+              </option>
+            ))}
+          </select>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage((p) => p + 1)}
-          disabled={page >= (data?.data?.pagination?.totalPages || 1)}
-          className="border-white/10 text-slate-300 hover:bg-white/10"
-        >
-          Next
-        </Button>
+
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="border-white/10 text-slate-300 hover:bg-white/10 text-xs"
+          >
+            Previous
+          </Button>
+          <div className="text-xs text-slate-400 font-medium">
+            Page {page} of {data?.data?.pagination?.totalPages || 1}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= (data?.data?.pagination?.totalPages || 1)}
+            className="border-white/10 text-slate-300 hover:bg-white/10 text-xs"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

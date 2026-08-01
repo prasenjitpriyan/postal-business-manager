@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Official, OfficialStatus } from '@/types/official'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import {
   ColumnDef,
@@ -47,12 +47,13 @@ const DeleteOfficialDialog = dynamic(
 export function OfficialsTable() {
   'use no memo';
   const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
-  const fetchOfficials = async (page: number, search: string, sortParams: string): Promise<{ data: { officials: Official[], pagination: { totalPages: number } } }> => {
-    const res = await fetch(`/api/officials?page=${page}&search=${search}&sort=${encodeURIComponent(sortParams)}`)
+  const fetchOfficials = async (page: number, limit: number, search: string, sortParams: string): Promise<{ data: { officials: Official[], pagination: { totalPages: number } } }> => {
+    const res = await fetch(`/api/officials?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&sort=${encodeURIComponent(sortParams)}`)
     if (!res.ok) throw new Error('Network response was not ok')
     return res.json()
   }
@@ -60,8 +61,9 @@ export function OfficialsTable() {
   const sortParams = JSON.stringify(sorting)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['officials', page, search, sortParams],
-    queryFn: () => fetchOfficials(page, search, sortParams),
+    queryKey: ['officials', page, limit, search, sortParams],
+    queryFn: () => fetchOfficials(page, limit, search, sortParams),
+    placeholderData: keepPreviousData,
   })
 
   useGSAP(
@@ -275,26 +277,48 @@ export function OfficialsTable() {
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
-        >
-          Previous
-        </Button>
-        <div className="text-sm">
-          Page {page} of {data?.data?.pagination?.totalPages || 1}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+        <div className="flex items-center space-x-2 text-xs sm:text-sm text-slate-400">
+          <span>Rows per page:</span>
+          <select
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value))
+              setPage(1)
+            }}
+            className="bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+          >
+            {[10, 20, 30, 50, 100].map((pageSize) => (
+              <option key={pageSize} value={pageSize} className="bg-slate-900 text-white">
+                {pageSize}
+              </option>
+            ))}
+          </select>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage((p) => p + 1)}
-          disabled={page >= (data?.data?.pagination?.totalPages || 1)}
-        >
-          Next
-        </Button>
+
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="text-xs"
+          >
+            Previous
+          </Button>
+          <div className="text-xs font-medium text-slate-300">
+            Page {page} of {data?.data?.pagination?.totalPages || 1}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= (data?.data?.pagination?.totalPages || 1)}
+            className="text-xs"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )
