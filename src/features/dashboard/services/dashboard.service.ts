@@ -14,7 +14,10 @@ export class DashboardService {
         topOfficialsResult,
         accountsByTypeResult,
         insuranceSummaryResult,
-        recentInsuranceActivity
+        recentInsuranceActivity,
+        insuranceByTypeResult,
+        topInsuranceOfficialsResult,
+        topInsuranceOfficesResult
       ] = await Promise.all([
         BusinessContribution.countDocuments(),
         Official.countDocuments(),
@@ -77,7 +80,60 @@ export class DashboardService {
           .sort({ contributionDate: -1, createdAt: -1 })
           .limit(6)
           .populate('officialId', 'name office designation')
-          .lean()
+          .lean(),
+        InsuranceContribution.aggregate([
+          {
+            $group: {
+              _id: '$insuranceType',
+              totalSumAssured: { $sum: '$sumAssured' },
+              totalInitialPremium: { $sum: '$initialPremium' },
+              count: { $sum: 1 }
+            }
+          }
+        ]),
+        InsuranceContribution.aggregate([
+          {
+            $group: {
+              _id: '$officialId',
+              totalSumAssured: { $sum: '$sumAssured' },
+              totalInitialPremium: { $sum: '$initialPremium' },
+              policies: { $sum: 1 }
+            }
+          },
+          { $sort: { totalSumAssured: -1 } },
+          { $limit: 5 },
+          {
+            $lookup: {
+              from: 'officials',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'official'
+            }
+          },
+          { $unwind: '$official' },
+          {
+            $project: {
+              name: '$official.name',
+              designation: '$official.designation',
+              office: '$official.office',
+              totalSumAssured: 1,
+              totalInitialPremium: 1,
+              policies: 1
+            }
+          }
+        ]),
+        InsuranceContribution.aggregate([
+          {
+            $group: {
+              _id: '$officeOfIndexing',
+              totalSumAssured: { $sum: '$sumAssured' },
+              totalInitialPremium: { $sum: '$initialPremium' },
+              policies: { $sum: 1 }
+            }
+          },
+          { $sort: { totalSumAssured: -1 } },
+          { $limit: 5 }
+        ])
       ]);
 
       const totalAccountsOpened = totalAccountsResult[0]?.total || 0;
@@ -89,6 +145,9 @@ export class DashboardService {
         pliCount: 0,
         rpliCount: 0
       };
+
+      const pliData = insuranceByTypeResult.find(i => i._id === 'PLI') || { totalSumAssured: 0, totalInitialPremium: 0, count: 0 };
+      const rpliData = insuranceByTypeResult.find(i => i._id === 'RPLI') || { totalSumAssured: 0, totalInitialPremium: 0, count: 0 };
 
       return {
         totalContributions,
@@ -113,7 +172,26 @@ export class DashboardService {
           totalInsuranceEntries: insSum.totalInsuranceEntries,
           pliCount: insSum.pliCount,
           rpliCount: insSum.rpliCount,
+          pliSumAssured: pliData.totalSumAssured,
+          pliInitialPremium: pliData.totalInitialPremium,
+          rpliSumAssured: rpliData.totalSumAssured,
+          rpliInitialPremium: rpliData.totalInitialPremium,
         },
+        topInsuranceOfficials: topInsuranceOfficialsResult.map(o => ({
+          id: o._id,
+          name: o.name,
+          designation: o.designation,
+          office: o.office,
+          totalSumAssured: o.totalSumAssured,
+          totalInitialPremium: o.totalInitialPremium,
+          policies: o.policies
+        })),
+        topInsuranceOffices: topInsuranceOfficesResult.map(off => ({
+          office: off._id || 'N/A',
+          totalSumAssured: off.totalSumAssured,
+          totalInitialPremium: off.totalInitialPremium,
+          policies: off.policies
+        })),
         recentInsuranceActivity
       };
     } catch (error) {

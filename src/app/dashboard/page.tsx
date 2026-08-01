@@ -190,16 +190,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Insurance Particulars Summary Row */}
-      <div className="dash-widget bg-linear-to-r from-slate-950/80 via-emerald-950/20 to-slate-950/80 border border-emerald-500/20 rounded-3xl p-6 backdrop-blur-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      {/* Insurance Particulars Overview Row */}
+      <div className="dash-widget bg-linear-to-r from-slate-950/80 via-emerald-950/20 to-slate-950/80 border border-emerald-500/20 rounded-3xl p-6 backdrop-blur-md space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-bold text-white text-xl">Insurance Particulars Overview</h3>
-              <p className="text-xs text-slate-400">PLI & RPLI policy totals and initial premium summaries</p>
+              <p className="text-xs text-slate-400">Postal Life Insurance (PLI) & Rural Postal Life Insurance (RPLI) performance</p>
             </div>
           </div>
           <Link href="/dashboard/insurance">
@@ -209,43 +209,89 @@ export default function DashboardPage() {
           </Link>
         </div>
 
+        {/* 4 Core Insurance KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+          <div className="bg-slate-900/70 border border-emerald-500/20 rounded-2xl p-4 relative overflow-hidden group">
+            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all" />
             <span className="text-xs font-medium text-slate-400">Total Sum Assured</span>
             <p className="text-2xl font-extrabold text-white mt-1">
               {isLoading ? '--' : formatCurrency(stats.insuranceStats?.totalSumAssured || 0)}
             </p>
+            <span className="text-[10px] text-emerald-400 font-medium">Sum of all policies</span>
           </div>
-          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
+
+          <div className="bg-slate-900/70 border border-emerald-500/20 rounded-2xl p-4 relative overflow-hidden group">
+            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-teal-500/10 rounded-full blur-xl group-hover:bg-teal-500/20 transition-all" />
             <span className="text-xs font-medium text-slate-400">Total Initial Premium</span>
             <p className="text-2xl font-extrabold text-emerald-400 mt-1">
               {isLoading ? '--' : formatCurrency(stats.insuranceStats?.totalInitialPremium || 0)}
             </p>
+            <span className="text-[10px] text-slate-400 font-medium">Revenue collected</span>
           </div>
-          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
-            <span className="text-xs font-medium text-slate-400">PLI Policies Logged</span>
+
+          <div className="bg-slate-900/70 border border-indigo-500/20 rounded-2xl p-4 relative overflow-hidden group">
+            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all" />
+            <span className="text-xs font-medium text-slate-400">PLI Policies</span>
             <div className="flex items-baseline justify-between mt-1">
               <p className="text-2xl font-extrabold text-indigo-400">
                 {isLoading ? '--' : (stats.insuranceStats?.pliCount || 0)}
               </p>
-              <span className="text-xs text-slate-500">PLI</span>
+              <span className="text-[10px] text-indigo-300 font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">PLI</span>
             </div>
+            <span className="text-[10px] text-slate-400">
+              {isLoading ? '' : `Sum: ${formatCurrency(stats.insuranceStats?.pliSumAssured || 0)}`}
+            </span>
           </div>
-          <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4">
-            <span className="text-xs font-medium text-slate-400">RPLI Policies Logged</span>
+
+          <div className="bg-slate-900/70 border border-sky-500/20 rounded-2xl p-4 relative overflow-hidden group">
+            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-sky-500/10 rounded-full blur-xl group-hover:bg-sky-500/20 transition-all" />
+            <span className="text-xs font-medium text-slate-400">RPLI Policies</span>
             <div className="flex items-baseline justify-between mt-1">
               <p className="text-2xl font-extrabold text-sky-400">
                 {isLoading ? '--' : (stats.insuranceStats?.rpliCount || 0)}
               </p>
-              <span className="text-xs text-slate-500">RPLI</span>
+              <span className="text-[10px] text-sky-300 font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20">RPLI</span>
             </div>
+            <span className="text-[10px] text-slate-400">
+              {isLoading ? '' : `Sum: ${formatCurrency(stats.insuranceStats?.rpliSumAssured || 0)}`}
+            </span>
           </div>
         </div>
+
+        {/* Visual Progress Bar & Share breakdown */}
+        {!isLoading && stats.insuranceStats && (stats.insuranceStats.pliCount + stats.insuranceStats.rpliCount > 0) && (
+          <div className="bg-slate-900/80 border border-white/5 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
+                PLI ({Math.round((stats.insuranceStats.pliCount / (stats.insuranceStats.pliCount + stats.insuranceStats.rpliCount || 1)) * 100)}%)
+              </span>
+              <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                RPLI ({Math.round((stats.insuranceStats.rpliCount / (stats.insuranceStats.pliCount + stats.insuranceStats.rpliCount || 1)) * 100)}%)
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block" />
+              </span>
+            </div>
+            <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden flex">
+              <div 
+                className="bg-linear-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-700" 
+                style={{ width: `${Math.round((stats.insuranceStats.pliCount / (stats.insuranceStats.pliCount + stats.insuranceStats.rpliCount || 1)) * 100)}%` }}
+              />
+              <div 
+                className="bg-linear-to-r from-sky-400 to-teal-400 h-full transition-all duration-700" 
+                style={{ width: `${Math.round((stats.insuranceStats.rpliCount / (stats.insuranceStats.pliCount + stats.insuranceStats.rpliCount || 1)) * 100)}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[11px] text-slate-400 pt-1">
+              <span>PLI Premium: <strong className="text-indigo-300">{formatCurrency(stats.insuranceStats.pliInitialPremium || 0)}</strong></span>
+              <span>RPLI Premium: <strong className="text-sky-300">{formatCurrency(stats.insuranceStats.rpliInitialPremium || 0)}</strong></span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: Recent Activity & Product Breakdown */}
+        {/* Left 2 Columns: Activity Tables & Product Distribution */}
         <div className="lg:col-span-2 space-y-6">
           {/* Recent Business Activity Widget */}
           <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
@@ -355,7 +401,7 @@ export default function DashboardPage() {
                         <td className="py-3 px-4">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                             item.insuranceType === 'PLI'
-                              ? 'bg-blue-500/10 text-blue-300 border-blue-500/20'
+                              ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
                               : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
                           }`}>
                             {item.insuranceType || 'N/A'}
@@ -408,14 +454,99 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right 1 Column: Top Officials Leaderboard & Reports Shortcut */}
+        {/* Right 1 Column: Top Officials & Top Insurance Champions Leaderboards */}
         <div className="space-y-6">
-          {/* Top Officials Leaderboard */}
+          {/* Top Insurance Performers (Champions) Widget */}
+          <div className="dash-widget bg-slate-950/50 border border-emerald-500/20 rounded-3xl p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-semibold text-white text-lg">Insurance Champions</h3>
+              </div>
+              <Link href="/dashboard/insurance" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center">
+                View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              </Link>
+            </div>
+
+            {isLoading ? (
+              <p className="text-xs text-slate-500 py-4">Loading insurance champions...</p>
+            ) : !stats.topInsuranceOfficials || stats.topInsuranceOfficials.length === 0 ? (
+              <p className="text-xs text-slate-500 py-4">No insurance performer records available.</p>
+            ) : (
+              <div className="space-y-3">
+                {stats.topInsuranceOfficials.map((off: { id?: string; name?: string; office?: string; designation?: string; totalSumAssured?: number; totalInitialPremium?: number; policies?: number }, idx: number) => (
+                  <div key={off.id || `ins-off-${idx}`} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-emerald-500/20 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                        idx === 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                        idx === 1 ? 'bg-teal-500/20 text-teal-200 border border-teal-500/30' :
+                        idx === 2 ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' :
+                        'bg-slate-800 text-slate-400'
+                      }`}>
+                        #{idx + 1}
+                      </div>
+                      <div className="overflow-hidden">
+                        <p className="text-xs font-semibold text-white truncate">{off.name || 'Unknown'}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{off.office || 'Official'} ({off.policies || 0} policies)</p>
+                      </div>
+                    </div>
+                    <div className="text-right pl-2">
+                      <span className="text-xs font-bold text-emerald-400">{formatCurrency(off.totalSumAssured || 0)}</span>
+                      <p className="text-[10px] text-slate-400 font-mono">Prem: {formatCurrency(off.totalInitialPremium || 0)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Top Insurance Indexing Offices Widget */}
+          <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-teal-400" />
+                <h3 className="font-semibold text-white text-lg">Top Indexing Offices</h3>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <p className="text-xs text-slate-500 py-4">Loading top offices...</p>
+            ) : !stats.topInsuranceOffices || stats.topInsuranceOffices.length === 0 ? (
+              <p className="text-xs text-slate-500 py-4">No office records available.</p>
+            ) : (
+              <div className="space-y-3">
+                {stats.topInsuranceOffices.map((off: { office?: string; totalSumAssured?: number; totalInitialPremium?: number; policies?: number }, idx: number) => {
+                  const maxSum = stats.topInsuranceOffices[0]?.totalSumAssured || 1;
+                  const barWidth = Math.min(100, Math.max(10, Math.round(((off.totalSumAssured || 0) / maxSum) * 100)));
+                  return (
+                    <div key={`ins-office-${idx}`} className="space-y-1.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-white truncate max-w-[140px]">{off.office || 'N/A'}</span>
+                        <span className="font-bold text-emerald-400">{formatCurrency(off.totalSumAssured || 0)}</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-linear-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500" 
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-400">
+                        <span>{off.policies || 0} policies logged</span>
+                        <span>Premium: {formatCurrency(off.totalInitialPremium || 0)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Top Officials Leaderboard (Accounts) */}
           <div className="dash-widget bg-slate-950/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-400" />
-                <h3 className="font-semibold text-white text-lg">Top Performers</h3>
+                <h3 className="font-semibold text-white text-lg">Top Account Performers</h3>
               </div>
               <Link href="/dashboard/officials" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center">
                 View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
