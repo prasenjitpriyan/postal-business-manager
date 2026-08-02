@@ -137,6 +137,39 @@
   select {
     cursor: pointer !important;
   }
+
+  input[type="date"] {
+    color-scheme: dark;
+    color: inherit;
+  }
+
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  input[type="date"]::-webkit-datetime-edit-text,
+  input[type="date"]::-webkit-datetime-edit-month-field,
+  input[type="date"]::-webkit-datetime-edit-day-field,
+  input[type="date"]::-webkit-datetime-edit-year-field {
+    color: inherit;
+  }
+
+  input[type="date"][value=""]::-webkit-datetime-edit,
+  input[type="date"][value=""]::-webkit-datetime-edit-fields-wrapper,
+  input[type="date"][value=""]::-webkit-datetime-edit-text,
+  input[type="date"][value=""]::-webkit-datetime-edit-month-field,
+  input[type="date"][value=""]::-webkit-datetime-edit-day-field,
+  input[type="date"][value=""]::-webkit-datetime-edit-year-field {
+    color: var(--muted-foreground, #94a3b8);
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
 }
 
 /* Custom Scrollbar Styles */

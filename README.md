@@ -21,7 +21,7 @@
 - **Insurance Champions Leaderboard**: Highlights top performing postal officials based on policy volume and total sum assured.
 
 ### 👥 2. Postal Officials Directory
-- **Official Records**: Manage official names, designations, facility IDs, office assignments, contact numbers, and status (`ACTIVE` / `INACTIVE`).
+- **Official Records**: Manage official names, designations, office assignments, contact numbers, and status (`ACTIVE` / `INACTIVE`).
 - **Flexible Sorting & Search**: Multi-column sorting, real-time instant search, and customizable page-size selectors (**10**, **20**, **30**, **50**, **100** rows per page).
 
 ### 📈 3. Account Contributions Tracking
