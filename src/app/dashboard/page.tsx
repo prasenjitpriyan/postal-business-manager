@@ -463,7 +463,7 @@ export default function DashboardPage() {
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 <h3 className="font-semibold text-white text-lg">Insurance Champions</h3>
               </div>
-              <Link href="/dashboard/insurance" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center">
+              <Link href="/dashboard/insurance" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center shrink-0">
                 View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </Link>
             </div>
@@ -475,9 +475,9 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {stats.topInsuranceOfficials.map((off: { id?: string; name?: string; office?: string; designation?: string; totalSumAssured?: number; totalInitialPremium?: number; policies?: number }, idx: number) => (
-                  <div key={off.id || `ins-off-${idx}`} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-emerald-500/20 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                  <div key={off.id || `ins-off-${idx}`} className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-emerald-500/20 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center font-bold text-xs ${
                         idx === 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
                         idx === 1 ? 'bg-teal-500/20 text-teal-200 border border-teal-500/30' :
                         idx === 2 ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' :
@@ -485,13 +485,13 @@ export default function DashboardPage() {
                       }`}>
                         #{idx + 1}
                       </div>
-                      <div className="overflow-hidden">
-                        <p className="text-xs font-semibold text-white truncate">{off.name || 'Unknown'}</p>
-                        <p className="text-[11px] text-slate-400 truncate">{off.office || 'Official'} ({off.policies || 0} policies)</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-white truncate" title={off.name || 'Unknown'}>{off.name || 'Unknown'}</p>
+                        <p className="text-[11px] text-slate-400 truncate" title={`${off.office || 'Official'} (${off.policies || 0} policies)`}>{off.office || 'Official'} ({off.policies || 0} policies)</p>
                       </div>
                     </div>
-                    <div className="text-right pl-2">
-                      <span className="text-xs font-bold text-emerald-400">{formatCurrency(off.totalSumAssured || 0)}</span>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-bold text-emerald-400 block">{formatCurrency(off.totalSumAssured || 0)}</span>
                       <p className="text-[10px] text-slate-400 font-mono">Prem: {formatCurrency(off.totalInitialPremium || 0)}</p>
                     </div>
                   </div>
@@ -520,9 +520,9 @@ export default function DashboardPage() {
                   const barWidth = Math.min(100, Math.max(10, Math.round(((off.totalSumAssured || 0) / maxSum) * 100)));
                   return (
                     <div key={`ins-office-${idx}`} className="space-y-1.5 p-3 rounded-2xl bg-white/5 border border-white/5">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-white truncate max-w-35">{off.office || 'N/A'}</span>
-                        <span className="font-bold text-emerald-400">{formatCurrency(off.totalSumAssured || 0)}</span>
+                      <div className="flex justify-between items-center text-xs gap-2">
+                        <span className="font-semibold text-white truncate min-w-0 flex-1" title={off.office || 'N/A'}>{off.office || 'N/A'}</span>
+                        <span className="font-bold text-emerald-400 shrink-0">{formatCurrency(off.totalSumAssured || 0)}</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div 
@@ -548,7 +548,7 @@ export default function DashboardPage() {
                 <Award className="w-5 h-5 text-amber-400" />
                 <h3 className="font-semibold text-white text-lg">Top Account Performers</h3>
               </div>
-              <Link href="/dashboard/officials" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center">
+              <Link href="/dashboard/officials" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center shrink-0">
                 View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </Link>
             </div>
@@ -560,9 +560,9 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {stats.topOfficials.map((off: { id?: string; name?: string; office?: string; designation?: string; totalAccounts?: number }, idx: number) => (
-                  <div key={off.id || `off-${idx}`} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                  <div key={off.id || `off-${idx}`} className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center font-bold text-xs ${
                         idx === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
                         idx === 1 ? 'bg-slate-300/20 text-slate-200 border border-slate-300/30' :
                         idx === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' :
@@ -570,13 +570,13 @@ export default function DashboardPage() {
                       }`}>
                         #{idx + 1}
                       </div>
-                      <div className="overflow-hidden">
-                        <p className="text-xs font-semibold text-white truncate">{off.name || 'Unknown'}</p>
-                        <p className="text-[11px] text-slate-400 truncate">{off.designation || off.office || 'Official'}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-white truncate" title={off.name || 'Unknown'}>{off.name || 'Unknown'}</p>
+                        <p className="text-[11px] text-slate-400 truncate" title={off.designation || off.office || 'Official'}>{off.designation || off.office || 'Official'}</p>
                       </div>
                     </div>
-                    <div className="text-right pl-2">
-                      <span className="text-xs font-bold text-emerald-400">{off.totalAccounts || 0}</span>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-bold text-emerald-400 block">{off.totalAccounts || 0}</span>
                       <p className="text-[10px] text-slate-500">opened</p>
                     </div>
                   </div>
