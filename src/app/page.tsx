@@ -251,11 +251,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 bg-slate-950/30 backdrop-blur-md py-10 px-8 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="footer-brand flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <Box className="w-4 h-4 text-white" aria-hidden="true" />
-            </div>
-            <span className="text-lg font-bold tracking-tight">Postal Manager</span>
+          <div className="footer-brand flex items-center opacity-90 hover:opacity-100 transition-opacity">
+            <PostalLogo size="md" />
           </div>
           
           <p className="footer-text text-slate-500 text-sm">
