@@ -138,27 +138,6 @@ export function OfficialsTable() {
         },
       },
       {
-        accessorKey: 'facilityId',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-              className="-ml-4 hover:bg-white/5 hover:text-white"
-            >
-              Facility ID
-              {{
-                asc: <ArrowUp className="ml-2 h-4 w-4" />,
-                desc: <ArrowDown className="ml-2 h-4 w-4" />,
-              }[column.getIsSorted() as string] ?? <ArrowUpDown className="ml-2 h-4 w-4 text-white/30" />}
-              {column.getSortIndex() !== -1 && sorting.length > 1 && (
-                <span className="ml-1 text-[10px] text-white/50">{column.getSortIndex() + 1}</span>
-              )}
-            </Button>
-          )
-        },
-      },
-      {
         accessorKey: 'office',
         header: ({ column }) => {
           return (
