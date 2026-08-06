@@ -1,5 +1,7 @@
 import { Toaster } from '@/components/ui/sonner'
 import { QueryProvider } from '@/providers/QueryProvider'
+import { CustomCursor } from '@/components/ui/CustomCursor'
+import { ScrollProgress } from '@/components/ui/ScrollProgress'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
@@ -167,19 +169,24 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
+          key="ld-json-software"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }}
         />
         <script
+          key="ld-json-org"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
         />
         <script
+          key="ld-json-website"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <ScrollProgress />
+        <CustomCursor />
         <QueryProvider>
           {children}
           <Toaster />
