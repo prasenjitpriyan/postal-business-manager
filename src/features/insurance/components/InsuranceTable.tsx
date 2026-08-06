@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { ArrowUpDown, ArrowUp, ArrowDown, ShieldCheck, IndianRupee, FileCheck, Layers, Download } from 'lucide-react';
 import { InsuranceContribution, InsuranceType } from '@/types/insurance';
 import { gsap } from 'gsap';
@@ -368,60 +368,52 @@ export function InsuranceTable() {
     <div className="space-y-6">
       {/* Metric Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Total Sum Assured</p>
-              <p className="text-xl font-bold text-white mt-1">
-                {isLoading ? '--' : formatCurrency(summary.totalSumAssured)}
-              </p>
-            </div>
+        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 p-5 gap-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-400 font-medium">Total Sum Assured</p>
             <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
-          </CardContent>
+          </div>
+          <p className="text-2xl font-bold text-white">
+            {isLoading ? '--' : formatCurrency(summary.totalSumAssured)}
+          </p>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Total Initial Premium</p>
-              <p className="text-xl font-bold text-emerald-400 mt-1">
-                {isLoading ? '--' : formatCurrency(summary.totalInitialPremium)}
-              </p>
-            </div>
+        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 p-5 gap-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-400 font-medium">Total Initial Premium</p>
             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
               <IndianRupee className="w-5 h-5" />
             </div>
-          </CardContent>
+          </div>
+          <p className="text-2xl font-bold text-emerald-400">
+            {isLoading ? '--' : formatCurrency(summary.totalInitialPremium)}
+          </p>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-medium">PLI Policies</p>
-              <p className="text-xl font-bold text-white mt-1">
-                {isLoading ? '--' : summary.pliCount}
-              </p>
-            </div>
+        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 p-5 gap-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-400 font-medium">PLI Policies</p>
             <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
               <FileCheck className="w-5 h-5" />
             </div>
-          </CardContent>
+          </div>
+          <p className="text-2xl font-bold text-white">
+            {isLoading ? '--' : summary.pliCount}
+          </p>
         </Card>
 
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 font-medium">RPLI Policies</p>
-              <p className="text-xl font-bold text-white mt-1">
-                {isLoading ? '--' : summary.rpliCount}
-              </p>
-            </div>
+        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 p-5 gap-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-400 font-medium">RPLI Policies</p>
             <div className="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
               <Layers className="w-5 h-5" />
             </div>
-          </CardContent>
+          </div>
+          <p className="text-2xl font-bold text-white">
+            {isLoading ? '--' : summary.rpliCount}
+          </p>
         </Card>
       </div>
 
