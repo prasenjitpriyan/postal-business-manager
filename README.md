@@ -4,58 +4,65 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Database-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![GSAP](https://img.shields.io/badge/GSAP-Animation_Engine-green?style=for-the-badge&logo=greensock)](https://gsap.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-UI_Motion-purple?style=for-the-badge&logo=framer)](https://motion.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Database-13AA52?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
 
 > **Live Deployment:** [https://postal-business-manager.vercel.app/](https://postal-business-manager.vercel.app/)
 
-**Postal Business Manager** is a modern, mobile-first web application engineered to streamline postal operations, track postal officials, monitor business contributions, analyze **PLI (Postal Life Insurance)** and **RPLI (Rural Postal Life Insurance)** policy metrics, and provide real-time analytical reports with role-based access control.
+**Postal Business Manager** is a state-of-the-art operational platform engineered to streamline postal business workflows, track official contributions, oversee **PLI (Postal Life Insurance)** and **RPLI (Rural Postal Life Insurance)** policy performance, and deliver high-impact analytical reports.
+
+Enhanced with a modern developer portfolio motion suite combining **Next.js**, **GSAP**, and **Framer Motion**, the platform offers a fluid, interactive, and high-precision user experience.
 
 ---
 
 ## 🌟 Key Features
 
-### 🛡️ 1. PLI & RPLI Insurance Particulars
-- **Policy Tracking**: Track Date, Official Name, Office of Indexing, Insurance Type (`PLI` / `RPLI`), Sum Assured, and Initial Premium.
-- **KPI Metrics**: Real-time summary cards for Total Sum Assured, Total Initial Premium, PLI Count, and RPLI Count.
-- **Distribution Analytics**: Interactive PLI vs RPLI distribution progress bar and top indexing offices ranking.
-- **Insurance Champions Leaderboard**: Highlights top performing postal officials based on policy volume and total sum assured.
+### ✨ 1. Portfolio Motion & Interactive Design Suite
+- **SplitText 3D Hero Reveal**: 3D perspective word and character reveal sequence powered by GSAP.
+- **Custom Cursor & Spotlight**: Spring-physics trailing cursor with hover element scaling and an ambient background spotlight glow.
+- **Scroll Progress Indicator**: Top horizontal gradient progress bar tracking scroll depth across pages.
+- **3D Card Hover Tilt**: Dynamic perspective card container calculating `rotateX`, `rotateY`, and mouse glare spotlight reflections on hover.
+- **Magnetic Action Buttons**: Physics-based magnetic attraction pulling CTA buttons towards mouse coordinates.
+- **Infinite Skills & Tech Marquee**: Seamless horizontal infinite loop showcasing stack technologies and postal modules.
+- **Scroll-Triggered Number Counters**: Animated numerical stat counters using exponential easing algorithms.
+- **Interactive Workflow Timeline**: Scroll-triggered operational timeline with SVG path drawing and step animations.
 
-### 👥 2. Postal Officials Directory
-- **Official Records**: Manage official names, designations, office assignments, contact numbers, and status (`ACTIVE` / `INACTIVE`).
+### 🛡️ 2. PLI & RPLI Insurance Particulars
+- **Policy Tracking**: Track Date, Official Name, Office of Indexing, Insurance Type (`PLI` / `RPLI`), Sum Assured, and Initial Premium.
+- **KPI Summary Cards**: Top-right icon aligned cards displaying Total Sum Assured, Total Initial Premium, PLI Count, and RPLI Count formatted cleanly as whole numbers (`₹5,00,000`).
+- **Distribution Analytics**: Interactive PLI vs RPLI distribution progress bar and top indexing offices ranking.
+- **Insurance Champions Leaderboard**: Highlights top-performing postal officials based on policy volume and total sum assured.
+
+### 👥 3. Postal Officials Directory
+- **Streamlined Official Records**: Manage official names, designations, office assignments, contact numbers, and status (`ACTIVE` / `INACTIVE`).
 - **Flexible Sorting & Search**: Multi-column sorting, real-time instant search, and customizable page-size selectors (**10**, **20**, **30**, **50**, **100** rows per page).
 
-### 📈 3. Account Contributions Tracking
-- **Business Monitoring**: Record daily account opening contributions across various savings and deposit account types.
+### 📈 4. Account Contributions Tracking
+- **Business Monitoring**: Record daily account opening contributions across savings and deposit account types.
 - **Date Range Filters**: Filter records by custom date ranges (`Start Date` to `End Date`) or quick preset filters (`Last 30 Days`, `Last 90 Days`, `All Time`).
 
-### 📊 4. Reports & CSV Exporting
+### 📊 5. Reports & CSV Exporting
 - **Visual Analytics**: Interactive trend graphs for monthly business growth, top performing offices, and account type breakdowns.
-- **One-Click Exports**: Download raw or aggregated reports instantly as `.csv` files for offline processing and government auditing.
+- **One-Click Exports**: Download raw or aggregated reports instantly as `.csv` files for offline processing and departmental auditing.
 
-### 🔒 5. Role-Based Access Control (RBAC) & User Management
-- **Admin Role**: Full system access to Create, Edit, Delete records, and access the **User Access Control** window (`/dashboard/users`) to promote or demote user accounts.
-- **Viewer Role**: Strict read-only access for viewing dashboards, tables, metrics, and exporting reports without modifying or deleting data.
-- **Admin Role Switcher**: Safety-protected admin panel allowing Administrators to upgrade `Viewer` accounts to `Admin` or demote `Admin` accounts to `Viewer`.
-
-### 🎨 6. Premium UI & Mobile-First Responsive Design
-- **Typography System**: Integrated **Plus Jakarta Sans** (headings & UI copy) and **JetBrains Mono** (currency `₹`, counts, and financial metrics).
-- **Custom Postal Branding**: Vector `PostalLogo` emblem with Electric Blue, Amber, and Emerald gradient glows.
-- **Glassmorphic Aesthetics**: Modern dark glass cards, ambient floating background gradients, custom webkit scrollbars, and pointer hover cursors.
-- **Mobile Responsive Navigation**: Drawer sidebar with backdrop blur overlay, touch targets (`min-h-11`), and active route indicators.
+### 🔒 6. Role-Based Access Control (RBAC) & User Management
+- **Admin Role**: Full system access to Create, Edit, and Delete records, with administrative access to the **User Access Control** panel (`/dashboard/users`) to manage user roles.
+- **Viewer Role**: Read-only access for viewing dashboards, tables, metrics, and exporting reports without mutating data.
 
 ---
 
 ## 🚀 Tech Stack
 
-| Domain | Technology |
+| Layer | Technology |
 | :--- | :--- |
 | **Framework** | [Next.js 16](https://nextjs.org/) (App Router & Turbopack) |
 | **Language** | [TypeScript](https://www.typescriptlang.org/) & React 19 |
 | **Database** | [MongoDB](https://www.mongodb.com/) & [Mongoose](https://mongoosejs.com/) |
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) & Glassmorphism |
-| **Animations** | [GSAP 3](https://gsap.com/) & `@gsap/react` |
-| **State & Data Fetching** | [TanStack React Query v5](https://tanstack.com/query) & [Zustand](https://zustand-demo.pmnd.rs/) |
-| **Icons & Toast Notifications** | [Lucide React](https://lucide.dev/) & [Sonner](https://sonner.emilkowal.si/) |
+| **Animations** | [GSAP 3](https://gsap.com/), `@gsap/react`, & [Framer Motion](https://motion.dev/) |
+| **State & Fetching** | [TanStack React Query v5](https://tanstack.com/query) & [Zustand](https://zustand-demo.pmnd.rs/) |
+| **Icons & Notifications** | [Lucide React](https://lucide.dev/) & [Sonner](https://sonner.emilkowal.si/) |
 | **Deployment** | [Vercel](https://vercel.com/) |
 
 ---
@@ -71,7 +78,7 @@ MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/postal-busin
 # JWT Secret for Session Authentication
 JWT_SECRET=your_jwt_secret_key_here
 
-# App URL
+# Public App URL
 NEXT_PUBLIC_APP_URL=https://postal-business-manager.vercel.app
 ```
 
@@ -131,12 +138,15 @@ npm start
 
 ---
 
-## 🔍 SEO & Search Engine Optimization
+## 🔍 SEO & Public Information Pages
 
-The project includes built-in SEO enhancements for Google ranking and search indexing:
+The application implements SEO optimizations and complete public informational pages:
+- **Privacy Policy (`/privacy`)**: Data collection, security protocols, JWT encryption, and departmental governance policies.
+- **Terms of Service (`/terms`)**: Service terms, Role-Based Access Control rules, and record accuracy requirements.
+- **Contact (`/contact`)**: Interactive support messaging form with toast feedback, Central Headquarters location, phone helpline, and operational hours.
 - **JSON-LD Structured Data**: Embedded `SoftwareApplication`, `Organization`, and `WebSite` with `SearchAction` schema.
-- **Open Graph & Twitter Cards**: High-res 1200x630 metadata images, `summary_large_image` Twitter cards, and canonical links.
-- **Sitemap & Robots**: Automated `sitemap.xml` listing primary pages and `robots.txt` regulating search crawlers.
+- **Open Graph & Twitter Cards**: High-res metadata cards and canonical URLs.
+- **Robots & Dynamic Meta**: Clean semantic HTML hierarchy and accessibility optimization.
 
 ---
 

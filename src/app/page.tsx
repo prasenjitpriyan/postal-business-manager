@@ -371,9 +371,9 @@ export default function LandingPage() {
           </p>
           
           <nav aria-label="Footer Navigation" className="flex gap-6">
-            <Link href="#" id="footer-privacy-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" id="footer-terms-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" id="footer-contact-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
+            <Link href="/privacy" id="footer-privacy-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" id="footer-terms-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/contact" id="footer-contact-link" className="footer-link text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
           </nav>
         </div>
       </footer>
