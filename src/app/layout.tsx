@@ -189,9 +189,9 @@ export default function RootLayout({
         <CustomCursor />
         <QueryProvider>
           {children}
-          <Toaster />
-          <Analytics />
         </QueryProvider>
+        <Toaster />
+        <Analytics />
       </body>
     </html>
   )

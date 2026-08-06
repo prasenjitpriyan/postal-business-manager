@@ -277,7 +277,8 @@ export default function LandingPage() {
 
           <MagneticButton strength={0.25}>
             <Link href="/dashboard/insurance">
-              <Button variant="outline" size="lg" className="h-14 px-8 text-base sm:text-lg border-white/20 hover:bg-white/10 text-white rounded-full backdrop-blur-md">
+              <Button variant="outline" size="lg" className="h-14 px-8 text-base sm:text-lg bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 hover:border-emerald-400/60 rounded-full backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)] font-bold transition-all">
+                <Shield className="w-5 h-5 mr-2 text-emerald-400" />
                 PLI & RPLI Tracker
               </Button>
             </Link>
@@ -292,10 +293,10 @@ export default function LandingPage() {
         {/* Animated Counter Stats Row */}
         <section aria-label="Key Performance Statistics" className="w-full max-w-5xl mt-20 px-4 gsap-reveal-section">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <AnimatedCounter value={500} suffix="+" label="Officials Tracked" />
-            <AnimatedCounter value={10} prefix="₹" suffix="M+" label="Sum Assured" />
-            <AnimatedCounter value={100} suffix="+" label="Postal Offices" />
-            <AnimatedCounter value={99.9} suffix="%" label="Audit Accuracy" />
+            <AnimatedCounter key="ac-officials" value={500} suffix="+" label="Officials Tracked" />
+            <AnimatedCounter key="ac-sum" value={10} prefix="₹" suffix="M+" label="Sum Assured" />
+            <AnimatedCounter key="ac-offices" value={100} suffix="+" label="Postal Offices" />
+            <AnimatedCounter key="ac-accuracy" value={99.9} suffix="%" label="Audit Accuracy" />
           </div>
         </section>
 
@@ -311,7 +312,7 @@ export default function LandingPage() {
           </div>
 
           <div className="feature-cards-container grid md:grid-cols-3 gap-6 px-4 text-left">
-            <TiltCard maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
+            <TiltCard key="tc-fast" maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
               <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6 border border-blue-500/30">
                 <Zap className="w-6 h-6 text-blue-400" aria-hidden="true" />
               </div>
@@ -321,7 +322,7 @@ export default function LandingPage() {
               </p>
             </TiltCard>
 
-            <TiltCard maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
+            <TiltCard key="tc-secure" maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-500/30">
                 <Shield className="w-6 h-6 text-indigo-400" aria-hidden="true" />
               </div>
@@ -331,7 +332,7 @@ export default function LandingPage() {
               </p>
             </TiltCard>
 
-            <TiltCard maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
+            <TiltCard key="tc-tracking" maxTilt={10} className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md p-8 shadow-xl">
               <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6 border border-cyan-500/30">
                 <Box className="w-6 h-6 text-cyan-400" aria-hidden="true" />
               </div>
