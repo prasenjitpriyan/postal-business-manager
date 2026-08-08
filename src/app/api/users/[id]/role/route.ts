@@ -12,7 +12,7 @@ export async function PATCH(
     await dbConnect();
 
     const session = await getAuthSession(req);
-    if (!session || session.role !== Role.ADMIN) {
+    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN)) {
       return errorResponse('Forbidden. Admin permissions required.', 403);
     }
 
@@ -20,8 +20,14 @@ export async function PATCH(
     const body = await req.json();
     const { role } = body;
 
-    if (!role || (role !== Role.ADMIN && role !== Role.VIEWER)) {
-      return errorResponse('Invalid role specified. Role must be Admin or Viewer.', 400);
+    const validRoles = Object.values(Role);
+    if (!role || !validRoles.includes(role)) {
+      return errorResponse(`Invalid role specified. Role must be Super Admin, Admin, or Viewer.`, 400);
+    }
+
+    // Only Super Admin can promote someone to Super Admin
+    if (role === Role.SUPER_ADMIN && session.role !== Role.SUPER_ADMIN) {
+      return errorResponse('Only Super Admin can assign the Super Admin role.', 403);
     }
 
     const targetUser = await User.findById(id);
@@ -29,11 +35,19 @@ export async function PATCH(
       return errorResponse('User not found.', 404);
     }
 
-    // Safety check: Prevent demoting the last remaining Admin in the system
-    if (targetUser.role === Role.ADMIN && role === Role.VIEWER) {
-      const adminCount = await User.countDocuments({ role: Role.ADMIN });
-      if (adminCount <= 1) {
-        return errorResponse('Cannot demote the only remaining Admin.', 400);
+    // Safety check: Prevent demoting the last remaining Super Admin
+    if (targetUser.role === Role.SUPER_ADMIN && role !== Role.SUPER_ADMIN) {
+      const superAdminCount = await User.countDocuments({ role: Role.SUPER_ADMIN });
+      if (superAdminCount <= 1) {
+        return errorResponse('Cannot demote the only remaining Super Admin. Grant Super Admin status to another user first for project handover.', 400);
+      }
+    }
+
+    // Safety check: Prevent demoting the last remaining Admin/Super Admin in the system
+    if ((targetUser.role === Role.ADMIN || targetUser.role === Role.SUPER_ADMIN) && role === Role.VIEWER) {
+      const elevatedCount = await User.countDocuments({ role: { $in: [Role.ADMIN, Role.SUPER_ADMIN] } });
+      if (elevatedCount <= 1) {
+        return errorResponse('Cannot demote the only remaining administrative user.', 400);
       }
     }
 

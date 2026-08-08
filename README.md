@@ -47,7 +47,8 @@ Enhanced with a modern developer portfolio motion suite combining **Next.js**, *
 - **One-Click Exports**: Download raw or aggregated reports instantly as `.csv` files for offline processing and departmental auditing.
 
 ### 🔒 6. Role-Based Access Control (RBAC) & User Management
-- **Admin Role**: Full system access to Create, Edit, and Delete records, with administrative access to the **User Access Control** panel (`/dashboard/users`) to manage user roles.
+- **Super Admin Role**: Top-level project ownership with full administrative rights, capability to promote/demote users to Super Admin, Admin, or Viewer, and hand over project ownership.
+- **Admin Role**: System access to Create, Edit, and Delete records, with administrative access to manage user roles between Admin and Viewer.
 - **Viewer Role**: Read-only access for viewing dashboards, tables, metrics, and exporting reports without mutating data.
 
 ---

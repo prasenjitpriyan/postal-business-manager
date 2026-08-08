@@ -63,7 +63,8 @@ export default function TermsOfServicePage() {
               Access to system features is regulated by account roles assigned by designated Administrators:
             </p>
             <ul className="list-disc list-inside space-y-2 text-slate-400">
-              <li><strong className="text-white">Admin Privileges:</strong> Authorized to create, edit, or delete official records and manage user role promotions/demotions.</li>
+              <li><strong className="text-white">Super Admin Privileges:</strong> Full project ownership with rights to assign Super Admin, Admin, or Viewer roles and perform project handover.</li>
+              <li><strong className="text-white">Admin Privileges:</strong> Authorized to create, edit, or delete official records and manage user role promotions/demotions for Administrators and Viewers.</li>
               <li><strong className="text-white">Viewer Privileges:</strong> Read-only authorization to view dashboards, analytical reports, and export CSV files without data mutation capabilities.</li>
             </ul>
           </section>

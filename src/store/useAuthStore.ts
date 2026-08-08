@@ -5,7 +5,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'Admin' | 'Viewer';
+  role: 'Super Admin' | 'Admin' | 'Viewer';
 }
 
 interface AuthState {

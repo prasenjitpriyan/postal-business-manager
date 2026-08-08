@@ -49,7 +49,7 @@ const DeleteContributionDialog = dynamic(
 export function ContributionsTable() {
   'use no memo';
   const user = useAuthStore((state) => state.user);
-  const isAdmin = user?.role === 'Admin';
+  const isAdmin = user?.role === 'Admin' || user?.role === 'Super Admin';
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');

@@ -33,7 +33,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Role based protection example for API
-  if (pathname.startsWith('/api/auth/register') && session.role !== 'Admin') {
+  if (pathname.startsWith('/api/auth/register') && session.role !== 'Admin' && session.role !== 'Super Admin') {
     return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
   }
 

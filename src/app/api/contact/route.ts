@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const session = await getAuthSession(req);
     if (!session) return errorResponse('Unauthorized', 401);
-    if (session.role !== Role.ADMIN) return errorResponse('Forbidden: Admin access required', 403);
+    if (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN) return errorResponse('Forbidden: Admin access required', 403);
 
     const messages = await ContactMessage.find().sort({ createdAt: -1 }).limit(100);
     return successResponse(messages);

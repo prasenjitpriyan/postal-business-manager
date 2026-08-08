@@ -29,7 +29,7 @@ export async function PUT(
   try {
     await dbConnect();
     const session = await getAuthSession(req);
-    if (!session || session.role !== Role.ADMIN) {
+    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN)) {
       return errorResponse('Forbidden. Admin permissions required.', 403);
     }
 
@@ -49,7 +49,7 @@ export async function DELETE(
   try {
     await dbConnect();
     const session = await getAuthSession(req);
-    if (!session || session.role !== Role.ADMIN) {
+    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN)) {
       return errorResponse('Forbidden: Admin access required', 403);
     }
 

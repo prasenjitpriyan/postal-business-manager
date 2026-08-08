@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles, UserCog, Mail } from 'lucide-react';
+import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles, UserCog, Mail, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PostalLogo } from '@/components/brand/PostalLogo';
 import { gsap } from 'gsap';
@@ -91,7 +91,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { href: '/dashboard/reports', label: 'Reports & Analytics', icon: BarChart3 },
   ];
 
-  if (user?.role === 'Admin') {
+  if (user?.role === 'Admin' || user?.role === 'Super Admin') {
     navItems.push({ href: '/dashboard/messages', label: 'Support Messages', icon: Mail });
     navItems.push({ href: '/dashboard/users', label: 'User Access Control', icon: UserCog });
   }
@@ -149,16 +149,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* User Account Details Footer */}
         <div className="p-4 border-t border-white/10 bg-slate-950/40">
           <div className="flex items-center space-x-3 mb-4 px-2 py-1">
-            <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-blue-500 via-indigo-600 to-amber-500 p-0.5 shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-purple-500 via-indigo-600 to-emerald-500 p-0.5 shadow-md">
               <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center font-bold text-white text-sm">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
             <div className="overflow-hidden flex-1">
               <p className="text-sm font-bold truncate text-white">{user?.name}</p>
-              <div className="flex items-center gap-1 text-[11px] text-blue-400 font-medium capitalize">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>{user?.role || 'Officer'}</span>
+              <div className="flex items-center gap-1 text-[11px] font-medium capitalize">
+                {user?.role === 'Super Admin' ? (
+                  <>
+                    <Crown className="w-3 h-3 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">Super Admin</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span className="text-blue-400">{user?.role || 'Officer'}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>

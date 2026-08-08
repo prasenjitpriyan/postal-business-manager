@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       const token = authHeader.split(' ')[1];
       try {
         const session = await verifyToken(token);
-        if (session && session.role === Role.ADMIN) {
+        if (session && (session.role === Role.ADMIN || session.role === Role.SUPER_ADMIN)) {
           isAdmin = true;
         }
       } catch {

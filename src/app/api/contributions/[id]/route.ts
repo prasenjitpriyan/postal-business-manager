@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await dbConnect();
     
     const session = await getAuthSession(req);
-    if (!session || session.role !== Role.ADMIN) {
+    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN)) {
       return errorResponse('Forbidden. Admin permissions required.', 403);
     }
 
@@ -48,7 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await dbConnect();
     
     const session = await getAuthSession(req);
-    if (!session || session.role !== Role.ADMIN) {
+    if (!session || (session.role !== Role.ADMIN && session.role !== Role.SUPER_ADMIN)) {
       return errorResponse('Forbidden: Only Admins can delete', 403);
     }
 
