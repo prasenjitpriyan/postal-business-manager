@@ -1,25 +1,20 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
-  Loader2, TrendingUp, Users, Activity, Building2, 
+  Loader2, TrendingUp, Activity, Building2, 
   Download, Calendar, LineChart as LineChartIcon, LayoutGrid, FileText,
-  ShieldCheck, FileSpreadsheet
+  ShieldCheck, FileSpreadsheet, Search, Filter, Printer, Award, Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const ChartSkeleton = () => (
   <div className="flex flex-col items-center justify-center h-80 w-full bg-slate-950/40 rounded-xl border border-white/5 animate-pulse space-y-3">
@@ -43,40 +38,28 @@ const ReportsOfficesCharts = dynamic(
   { loading: () => <ChartSkeleton />, ssr: false }
 );
 
+const ReportsInsuranceCharts = dynamic(
+  () => import('./ReportsInsuranceCharts').then((mod) => mod.ReportsInsuranceCharts),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
 export function ReportsDashboard() {
   const container = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'offices' | 'details' | 'insurance_details'>('overview');
-  const [preset, setPreset] = useState<'all' | '30d' | '90d' | 'custom'>('all');
+  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'offices' | 'insurance_deepdive' | 'audit_log'>('overview');
+  const [preset, setPreset] = useState<'all' | 'today' | '30d' | '90d' | 'custom'>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-
-  const handleTabChange = (tab: 'overview' | 'trends' | 'offices' | 'details' | 'insurance_details') => {
-    if (tab === activeTab) return;
-    if (container.current) {
-      const tabContent = container.current.querySelector('.gsap-tab-content');
-      if (tabContent) {
-        gsap.to(tabContent, {
-          opacity: 0,
-          y: -10,
-          duration: 0.15,
-          onComplete: () => {
-            setActiveTab(tab);
-            gsap.fromTo(tabContent, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
-          }
-        });
-        return;
-      }
-    }
-    setActiveTab(tab);
-  };
+  const [selectedOffice, setSelectedOffice] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['reports-summary', startDate, endDate],
+    queryKey: ['reports-summary', startDate, endDate, selectedOffice],
     queryFn: async () => {
       let url = '/api/reports/summary';
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
+      if (selectedOffice && selectedOffice !== 'all') params.append('office', selectedOffice);
       if (params.toString()) url += `?${params.toString()}`;
 
       const res = await fetch(url);
@@ -88,53 +71,28 @@ export function ReportsDashboard() {
   useGSAP(() => {
     if (!container.current || isLoading) return;
 
-    gsap.fromTo('.gsap-report-filter', 
-      { y: -15, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
-    );
-
-    gsap.fromTo('.gsap-report-tabs',
+    gsap.fromTo('.gsap-report-animate',
       { y: 15, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
     );
 
-    gsap.fromTo('.gsap-tab-content',
+    gsap.fromTo('.gsap-kpi-card',
       { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'back.out(1.2)' }
     );
 
-    const kpiCards = container.current.querySelectorAll('.gsap-kpi-card');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          gsap.to(entry.target, {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            ease: 'back.out(1.2)',
-            overwrite: 'auto'
-          });
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+  }, { scope: container, dependencies: [isLoading, activeTab] });
 
-    kpiCards.forEach((card) => {
-      gsap.set(card, { y: 25, opacity: 0, scale: 0.96 });
-      observer.observe(card);
-    });
-
-    return () => observer.disconnect();
-
-  }, { scope: container, dependencies: [data, isLoading, activeTab] });
-
-  const handlePresetChange = (selected: 'all' | '30d' | '90d' | 'custom') => {
+  const handlePresetChange = (selected: 'all' | 'today' | '30d' | '90d' | 'custom') => {
     setPreset(selected);
     const today = new Date();
     if (selected === 'all') {
       setStartDate('');
       setEndDate('');
+    } else if (selected === 'today') {
+      const todayStr = today.toISOString().split('T')[0];
+      setStartDate(todayStr);
+      setEndDate(todayStr);
     } else if (selected === '30d') {
       const past = new Date();
       past.setDate(today.getDate() - 30);
@@ -152,6 +110,7 @@ export function ReportsDashboard() {
     totalAccounts: 0,
     totalEntries: 0,
     avgAccountsPerEntry: 0,
+    availableOffices: [],
     accountsByType: [],
     accountsByOffice: [],
     accountsByOfficial: [],
@@ -162,8 +121,18 @@ export function ReportsDashboard() {
       totalInitialPremium: 0,
       totalInsuranceEntries: 0,
       pliCount: 0,
-      rpliCount: 0
+      rpliCount: 0,
+      pliSumAssured: 0,
+      rpliSumAssured: 0,
+      pliInitialPremium: 0,
+      rpliInitialPremium: 0,
+      avgSumAssuredPerPolicy: 0,
+      avgInitialPremiumPerPolicy: 0
     },
+    insuranceByOffice: [],
+    insuranceByOfficial: [],
+    insuranceOverTime: [],
+    insuranceSlabs: [],
     insuranceContributions: []
   };
 
@@ -175,9 +144,99 @@ export function ReportsDashboard() {
     }).format(amount || 0);
   };
 
+  // Filter detail tables based on search query
+  const filteredContributions = useMemo(() => {
+    if (!summary.recentContributions) return [];
+    if (!searchQuery.trim()) return summary.recentContributions;
+    const q = searchQuery.toLowerCase();
+    return summary.recentContributions.filter((item: { official?: { name?: string; office?: string }; contributeOffice?: string; accountType?: string }) => 
+      (item.official?.name || '').toLowerCase().includes(q) ||
+      (item.contributeOffice || item.official?.office || '').toLowerCase().includes(q) ||
+      (item.accountType || '').toLowerCase().includes(q)
+    );
+  }, [summary.recentContributions, searchQuery]);
+
+  const filteredInsurance = useMemo(() => {
+    if (!summary.insuranceContributions) return [];
+    if (!searchQuery.trim()) return summary.insuranceContributions;
+    const q = searchQuery.toLowerCase();
+    return summary.insuranceContributions.filter((item: { official?: { name?: string; office?: string }; officeOfIndexing?: string; insuranceType?: string; remarks?: string }) => 
+      (item.official?.name || '').toLowerCase().includes(q) ||
+      (item.officeOfIndexing || item.official?.office || '').toLowerCase().includes(q) ||
+      (item.insuranceType || '').toLowerCase().includes(q) ||
+      (item.remarks || '').toLowerCase().includes(q)
+    );
+  }, [summary.insuranceContributions, searchQuery]);
+
+  // Combined Post Office Performance Matrix
+  const officeMatrix = useMemo(() => {
+    const map = new Map<string, { office: string; accounts: number; sumAssured: number; premium: number; officials: Set<string> }>();
+
+    (summary.recentContributions || []).forEach((c: { contributeOffice?: string; officialId?: string; official?: { office?: string; _id?: string }; accountsOpened?: number }) => {
+      const offName = c.contributeOffice || c.official?.office || 'Unknown';
+      const offId = c.official?._id || c.officialId || 'off';
+      if (!map.has(offName)) {
+        map.set(offName, { office: offName, accounts: 0, sumAssured: 0, premium: 0, officials: new Set() });
+      }
+      const item = map.get(offName)!;
+      item.accounts += c.accountsOpened || 0;
+      if (offId) item.officials.add(String(offId));
+    });
+
+    (summary.insuranceContributions || []).forEach((c: { officeOfIndexing?: string; officialId?: string; official?: { office?: string; _id?: string }; sumAssured?: number; initialPremium?: number }) => {
+      const offName = c.officeOfIndexing || c.official?.office || 'Unknown';
+      const offId = c.official?._id || c.officialId || 'off';
+      if (!map.has(offName)) {
+        map.set(offName, { office: offName, accounts: 0, sumAssured: 0, premium: 0, officials: new Set() });
+      }
+      const item = map.get(offName)!;
+      item.sumAssured += c.sumAssured || 0;
+      item.premium += c.initialPremium || 0;
+      if (offId) item.officials.add(String(offId));
+    });
+
+    return Array.from(map.values())
+      .map(item => ({
+        ...item,
+        officialCount: item.officials.size
+      }))
+      .sort((a, b) => (b.accounts + b.sumAssured) - (a.accounts + a.sumAssured));
+  }, [summary.recentContributions, summary.insuranceContributions]);
+
+  // Export CSV Functions
+  const handleExportAccountsCSV = () => {
+    if (!summary.recentContributions || summary.recentContributions.length === 0) {
+      toast.error('No account contribution data available to export');
+      return;
+    }
+
+    const headers = ['Contribution Date', 'Official Name', 'Designation', 'Office', 'Account Type', 'Accounts Opened'];
+    const csvRows = [headers.join(',')];
+
+    summary.recentContributions.forEach((c: { contributionDate?: string; official?: { name?: string; designation?: string; office?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }) => {
+      const row = [
+        `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
+        `"${c.official?.name || 'N/A'}"`,
+        `"${c.official?.designation || ''}"`,
+        `"${c.contributeOffice || c.official?.office || ''}"`,
+        `"${c.accountType || ''}"`,
+        c.accountsOpened || 0
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `postal_account_contributions_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    toast.success('Account contributions CSV exported successfully!');
+  };
+
   const handleExportInsuranceCSV = () => {
     if (!summary.insuranceContributions || summary.insuranceContributions.length === 0) {
-      toast.error('No insurance report data available to export for selected range');
+      toast.error('No insurance data available to export');
       return;
     }
 
@@ -202,459 +261,605 @@ export function ReportsDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Insurance_Particulars_Report_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
+    link.download = `postal_insurance_policies_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    document.body.removeChild(link);
-    toast.success('Insurance Particulars Report exported to CSV successfully!');
+    toast.success('Insurance policies CSV exported successfully!');
   };
 
-  const handleExportBusinessCSV = () => {
-    if (!summary.recentContributions || summary.recentContributions.length === 0) {
-      toast.error('No business contribution report data available to export');
-      return;
-    }
+  const handleExportMasterCSV = () => {
+    const summaryHeader = [
+      ['Metric', 'Value'],
+      ['Total Accounts Opened', summary.totalAccounts],
+      ['Total Contribution Entries', summary.totalEntries],
+      ['Average Accounts per Entry', summary.avgAccountsPerEntry],
+      ['Total Insurance Sum Assured', summary.insuranceSummary?.totalSumAssured || 0],
+      ['Total Initial Premium Collected', summary.insuranceSummary?.totalInitialPremium || 0],
+      ['PLI Policies Count', summary.insuranceSummary?.pliCount || 0],
+      ['RPLI Policies Count', summary.insuranceSummary?.rpliCount || 0],
+      [],
+      ['--- POSTAL ACCOUNT CONTRIBUTIONS LOG ---'],
+      ['Date', 'Official Name', 'Office', 'Account Type', 'Accounts Opened']
+    ];
 
-    const headers = ['Contribution Date', 'Official Name', 'Contribute Office', 'Account Type', 'Accounts Opened', 'Remarks'];
-    const csvRows = [headers.join(',')];
+    const rows: string[] = summaryHeader.map(r => r.join(','));
 
-    summary.recentContributions.forEach((c: { contributionDate?: string; official?: { name?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number; remarks?: string }) => {
-      const row = [
+    (summary.recentContributions || []).forEach((c: { contributionDate?: string; official?: { name?: string; office?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }) => {
+      rows.push([
         `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
         `"${c.official?.name || 'N/A'}"`,
-        `"${c.contributeOffice || ''}"`,
+        `"${c.contributeOffice || c.official?.office || ''}"`,
         `"${c.accountType || ''}"`,
-        c.accountsOpened || 0,
-        `"${(c.remarks || '').replace(/"/g, '""')}"`
-      ];
-      csvRows.push(row.join(','));
+        c.accountsOpened || 0
+      ].join(','));
     });
 
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    rows.push('', '--- INSURANCE POLICIES LOG ---', 'Date,Official Name,Indexing Office,Insurance Type,Sum Assured,Initial Premium');
+
+    (summary.insuranceContributions || []).forEach((c: { contributionDate?: string; official?: { name?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number }) => {
+      rows.push([
+        `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
+        `"${c.official?.name || 'N/A'}"`,
+        `"${c.officeOfIndexing || ''}"`,
+        `"${c.insuranceType || ''}"`,
+        c.sumAssured || 0,
+        c.initialPremium || 0
+      ].join(','));
+    });
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Postal_Business_Contributions_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
+    link.download = `postal_master_business_report_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    document.body.removeChild(link);
-    toast.success('Business Contributions Report exported to CSV!');
+    toast.success('Master business report CSV downloaded!');
   };
 
-  const handleExportCombinedCSV = () => {
-    const hasBiz = summary.recentContributions && summary.recentContributions.length > 0;
-    const hasIns = summary.insuranceContributions && summary.insuranceContributions.length > 0;
-
-    if (!hasBiz && !hasIns) {
-      toast.error('No business or insurance data available for export');
-      return;
-    }
-
-    const csvRows: string[] = [];
-
-    csvRows.push('=== POSTAL BUSINESS MANAGER - COMBINED REPORT ===');
-    csvRows.push(`Export Date: "${new Date().toLocaleDateString('en-IN')}"`);
-    csvRows.push('');
-
-    if (hasBiz) {
-      csvRows.push('--- ACCOUNT CONTRIBUTIONS ---');
-      csvRows.push(['Contribution Date', 'Official Name', 'Contribute Office', 'Account Type', 'Accounts Opened', 'Remarks'].join(','));
-      summary.recentContributions.forEach((c: { contributionDate?: string; official?: { name?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number; remarks?: string }) => {
-        csvRows.push([
-          `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
-          `"${c.official?.name || 'N/A'}"`,
-          `"${c.contributeOffice || ''}"`,
-          `"${c.accountType || ''}"`,
-          c.accountsOpened || 0,
-          `"${(c.remarks || '').replace(/"/g, '""')}"`
-        ].join(','));
-      });
-      csvRows.push('');
-    }
-
-    if (hasIns) {
-      csvRows.push('--- INSURANCE PARTICULARS (PLI / RPLI) ---');
-      csvRows.push(['Contribution Date', 'Official Name', 'Designation', 'Office of Indexing', 'Insurance Type', 'Sum Assured (INR)', 'Initial Premium (INR)', 'Remarks'].join(','));
-      summary.insuranceContributions.forEach((c: { contributionDate?: string; official?: { name?: string; designation?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number; remarks?: string }) => {
-        csvRows.push([
-          `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
-          `"${c.official?.name || 'N/A'}"`,
-          `"${c.official?.designation || ''}"`,
-          `"${c.officeOfIndexing || ''}"`,
-          `"${c.insuranceType || ''}"`,
-          c.sumAssured || 0,
-          c.initialPremium || 0,
-          `"${(c.remarks || '').replace(/"/g, '""')}"`
-        ].join(','));
-      });
-    }
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Complete_Postal_Business_Report_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Combined Complete Business & Insurance Report exported!');
+  const handlePrint = () => {
+    window.print();
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-80 space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-        <p className="text-sm text-slate-400">Loading analytics & report metrics...</p>
-      </div>
-    );
-  }
 
   return (
     <div ref={container} className="space-y-6">
-      {/* Date Filter & Export Action Bar */}
-      <div className="gsap-report-filter flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-slate-950/60 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 mr-2">
-            <Calendar className="w-4 h-4 text-indigo-400" /> Date Range:
+      
+      {/* 1. Advanced Multi-Dimensional Filter Toolbar */}
+      <div className="gsap-report-animate bg-slate-900/60 border border-white/10 rounded-3xl p-5 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+              <Filter className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-base">Advanced Analytics Controls</h3>
+              <p className="text-xs text-slate-400">Filter parameters by date, post office, and search query</p>
+            </div>
           </div>
-          <Button
-            variant={preset === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handlePresetChange('all')}
-            className={preset === 'all' ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'border-white/10 text-slate-300'}
-          >
-            All Time
-          </Button>
-          <Button
-            variant={preset === '30d' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handlePresetChange('30d')}
-            className={preset === '30d' ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'border-white/10 text-slate-300'}
-          >
-            Last 30 Days
-          </Button>
-          <Button
-            variant={preset === '90d' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handlePresetChange('90d')}
-            className={preset === '90d' ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'border-white/10 text-slate-300'}
-          >
-            Last 90 Days
-          </Button>
-          
-          <div className="flex items-center gap-2 ml-auto sm:ml-0">
-            <Input
+
+          {/* Export Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" onClick={handleExportAccountsCSV} className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 h-8 rounded-xl shadow-xs">
+              <FileSpreadsheet className="w-3.5 h-3.5 mr-1" /> Accounts CSV
+            </Button>
+            <Button size="sm" onClick={handleExportInsuranceCSV} className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3 py-1.5 h-8 rounded-xl shadow-xs">
+              <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Insurance CSV
+            </Button>
+            <Button size="sm" onClick={handleExportMasterCSV} variant="outline" className="border-white/15 bg-white/5 hover:bg-white/10 text-slate-200 text-xs px-3 py-1.5 h-8 rounded-xl">
+              <Download className="w-3.5 h-3.5 mr-1" /> Master Report
+            </Button>
+            <Button size="sm" onClick={handlePrint} variant="ghost" className="text-slate-400 hover:text-white text-xs px-2.5 h-8">
+              <Printer className="w-3.5 h-3.5 mr-1" /> Print
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+          {/* Preset Date Buttons */}
+          <div className="space-y-1 sm:col-span-2">
+            <label className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-indigo-400" /> Date Preset
+            </label>
+            <div className="flex items-center p-1 bg-slate-950/80 border border-white/10 rounded-xl gap-1">
+              <button
+                type="button"
+                onClick={() => handlePresetChange('all')}
+                className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all ${preset === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                All Time
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePresetChange('today')}
+                className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all ${preset === 'today' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePresetChange('30d')}
+                className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all ${preset === '30d' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                30 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePresetChange('90d')}
+                className={`flex-1 py-1 rounded-lg text-xs font-semibold transition-all ${preset === '90d' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                90 Days
+              </button>
+            </div>
+          </div>
+
+          {/* Post Office Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+              <Building2 className="w-3 h-3 text-teal-400" /> Post Office Location
+            </label>
+            <select
+              value={selectedOffice}
+              onChange={(e) => setSelectedOffice(e.target.value)}
+              className="w-full h-9 bg-slate-950/80 border border-white/10 rounded-xl px-3 text-xs text-white outline-none"
+            >
+              <option value="all">All Post Offices</option>
+              {(summary.availableOffices || []).map((off: string) => (
+                <option key={off} value={off}>{off}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Keyword Search Filter */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+              <Search className="w-3 h-3 text-amber-400" /> Search Logs & Officials
+            </label>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search name, office, scheme..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 bg-slate-950/80 border-white/10 text-xs pl-8 rounded-xl"
+              />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Custom Date Pickers (if custom or selected) */}
+        <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">From:</span>
+            <input
               type="date"
               value={startDate}
-              onChange={(e) => {
-                setPreset('custom');
-                setStartDate(e.target.value);
-              }}
-              className="w-36 text-xs bg-slate-900 border-white/10 text-slate-200 scheme-dark"
-              title="Start Date"
-            />
-            <span className="text-slate-500 text-xs">to</span>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setPreset('custom');
-                setEndDate(e.target.value);
-              }}
-              className="w-36 text-xs bg-slate-900 border-white/10 text-slate-200 scheme-dark"
-              title="End Date"
+              onChange={(e) => { setStartDate(e.target.value); setPreset('custom'); }}
+              className="bg-slate-950/80 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white"
             />
           </div>
-        </div>
-
-        {/* Download CSV Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-          <Button
-            onClick={handleExportInsuranceCSV}
-            variant="outline"
-            size="sm"
-            className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border-emerald-500/30 font-medium text-xs transition-colors"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 mr-1.5" /> Insurance Particulars CSV
-          </Button>
-          <Button
-            onClick={handleExportBusinessCSV}
-            variant="outline"
-            size="sm"
-            className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border-indigo-500/30 font-medium text-xs transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 mr-1.5" /> Accounts CSV
-          </Button>
-          <Button
-            onClick={handleExportCombinedCSV}
-            variant="default"
-            size="sm"
-            className="bg-linear-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-emerald-900/30"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 mr-1.5" /> Complete Combined CSV
-          </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">To:</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setPreset('custom'); }}
+              className="bg-slate-950/80 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white"
+            />
+          </div>
+          {(startDate || endDate || selectedOffice !== 'all') && (
+            <button
+              type="button"
+              onClick={() => { setStartDate(''); setEndDate(''); setSelectedOffice('all'); setPreset('all'); }}
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Business KPIs */}
-        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-indigo-500/50 transition-all">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-400">Total Accounts Opened</CardTitle>
-            <TrendingUp className="h-4 w-4 text-indigo-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{summary.totalAccounts.toLocaleString()}</div>
-            <p className="text-[11px] text-slate-500 mt-1">{summary.totalEntries} submitted logs</p>
-          </CardContent>
-        </Card>
+      {/* 2. Top Executive Metric Cards (6 KPI Cards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="gsap-kpi-card bg-slate-900/60 border border-white/10 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>Total Accounts</span>
+            <TrendingUp className="w-4 h-4 text-indigo-400" />
+          </div>
+          <p className="text-2xl font-black text-white pt-1">{isLoading ? '--' : (summary.totalAccounts || 0).toLocaleString()}</p>
+          <p className="text-[10px] text-slate-400">{summary.totalEntries} log entries</p>
+        </div>
 
-        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 hover:border-sky-500/50 transition-all">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-slate-400">Top Performing Official</CardTitle>
-            <Users className="h-4 w-4 text-sky-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-base font-bold text-white truncate">
-              {summary.accountsByOfficial[0]?.name || 'N/A'}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1 truncate">
-              {summary.accountsByOfficial[0]?.accounts || 0} accounts opened
-            </p>
-          </CardContent>
-        </Card>
+        <div className="gsap-kpi-card bg-slate-900/60 border border-white/10 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>Avg / Entry</span>
+            <Activity className="w-4 h-4 text-blue-400" />
+          </div>
+          <p className="text-2xl font-black text-blue-400 pt-1">{isLoading ? '--' : summary.avgAccountsPerEntry}</p>
+          <p className="text-[10px] text-slate-400">accounts per submit</p>
+        </div>
 
-        {/* Insurance Particulars KPIs */}
-        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-emerald-500/20 text-slate-100 hover:border-emerald-500/50 transition-all">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-emerald-400">Total Insurance Sum Assured</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {formatCurrency(summary.insuranceSummary?.totalSumAssured || 0)}
-            </div>
-            <p className="text-[11px] text-emerald-500/80 mt-1">Across PLI & RPLI policies</p>
-          </CardContent>
-        </Card>
+        <div className="gsap-kpi-card bg-slate-900/60 border border-emerald-500/20 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>Sum Assured</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className="text-xl font-black text-emerald-400 pt-1 truncate" title={formatCurrency(summary.insuranceSummary?.totalSumAssured || 0)}>
+            {isLoading ? '--' : formatCurrency(summary.insuranceSummary?.totalSumAssured || 0)}
+          </p>
+          <p className="text-[10px] text-slate-400">{summary.insuranceSummary?.totalInsuranceEntries || 0} policies</p>
+        </div>
 
-        <Card className="gsap-kpi-card bg-slate-950/50 backdrop-blur-md border border-emerald-500/20 text-slate-100 hover:border-emerald-500/50 transition-all">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-emerald-400">Total Initial Premium</CardTitle>
-            <Activity className="h-4 w-4 text-emerald-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-400">
-              {formatCurrency(summary.insuranceSummary?.totalInitialPremium || 0)}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              PLI: {summary.insuranceSummary?.pliCount || 0} | RPLI: {summary.insuranceSummary?.rpliCount || 0}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="gsap-kpi-card bg-slate-900/60 border border-teal-500/20 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>Initial Premium</span>
+            <Zap className="w-4 h-4 text-teal-400" />
+          </div>
+          <p className="text-xl font-black text-white pt-1 truncate" title={formatCurrency(summary.insuranceSummary?.totalInitialPremium || 0)}>
+            {isLoading ? '--' : formatCurrency(summary.insuranceSummary?.totalInitialPremium || 0)}
+          </p>
+          <p className="text-[10px] text-slate-400">Revenue collected</p>
+        </div>
+
+        <div className="gsap-kpi-card bg-slate-900/60 border border-amber-500/20 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>PLI vs RPLI</span>
+            <Award className="w-4 h-4 text-amber-400" />
+          </div>
+          <p className="text-xl font-black text-amber-300 pt-1">
+            {summary.insuranceSummary?.pliCount || 0} : {summary.insuranceSummary?.rpliCount || 0}
+          </p>
+          <p className="text-[10px] text-slate-400">PLI to RPLI count</p>
+        </div>
+
+        <div className="gsap-kpi-card bg-slate-900/60 border border-purple-500/20 rounded-2xl p-4 backdrop-blur-xl space-y-1 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase">
+            <span>Active Offices</span>
+            <Building2 className="w-4 h-4 text-purple-400" />
+          </div>
+          <p className="text-2xl font-black text-white pt-1">{isLoading ? '--' : officeMatrix.length}</p>
+          <p className="text-[10px] text-slate-400">reporting units</p>
+        </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="gsap-report-tabs flex border-b border-white/10 gap-2 overflow-x-auto">
+      {/* 3. Breakdown Section Navigation Tabs */}
+      <div className="gsap-report-animate flex items-center p-1.5 bg-slate-900/80 border border-white/10 rounded-2xl overflow-x-auto gap-1">
         <button
-          onClick={() => handleTabChange('overview')}
-          className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+          type="button"
+          onClick={() => setActiveTab('overview')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === 'overview'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <LayoutGrid className="w-4 h-4" /> Overview & Breakdown
+          <LayoutGrid className="w-3.5 h-3.5" /> Executive Overview
         </button>
         <button
-          onClick={() => handleTabChange('trends')}
-          className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+          type="button"
+          onClick={() => setActiveTab('trends')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === 'trends'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <LineChartIcon className="w-4 h-4" /> Growth Trends
+          <LineChartIcon className="w-3.5 h-3.5" /> Growth & Trends
         </button>
         <button
-          onClick={() => handleTabChange('offices')}
-          className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+          type="button"
+          onClick={() => setActiveTab('offices')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === 'offices'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Building2 className="w-4 h-4" /> Office Analysis
+          <Building2 className="w-3.5 h-3.5" /> Office Matrix
         </button>
         <button
-          onClick={() => handleTabChange('details')}
-          className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'details'
-              ? 'border-indigo-500 text-indigo-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+          type="button"
+          onClick={() => setActiveTab('insurance_deepdive')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === 'insurance_deepdive'
+              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <FileText className="w-4 h-4" /> Business Logs
+          <ShieldCheck className="w-3.5 h-3.5" /> Insurance Deep-Dive
         </button>
         <button
-          onClick={() => handleTabChange('insurance_details')}
-          className={`flex items-center gap-2 pb-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'insurance_details'
-              ? 'border-emerald-500 text-emerald-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+          type="button"
+          onClick={() => setActiveTab('audit_log')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === 'audit_log'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <ShieldCheck className="w-4 h-4" /> Insurance Particulars Logs
+          <FileText className="w-3.5 h-3.5" /> Detailed Audit Log
         </button>
       </div>
 
-      {/* Tab Container */}
-      <div className="gsap-tab-content">
+      {/* 4. TAB CONTENTS */}
+      <div className="gsap-report-animate">
+        {/* TAB 1: Overview Charts */}
+        {activeTab === 'overview' && (
+          <ReportsOverviewCharts summary={summary} />
+        )}
 
-      {/* Tab 1: Overview */}
-      {activeTab === 'overview' && (
-        <ReportsOverviewCharts summary={summary} />
-      )}
+        {/* TAB 2: Time Series & Growth Trends */}
+        {activeTab === 'trends' && (
+          <ReportsTrendsCharts summary={summary} />
+        )}
 
-      {/* Tab 2: Growth Trends */}
-      {activeTab === 'trends' && (
-        <ReportsTrendsCharts summary={summary} />
-      )}
+        {/* TAB 3: Post Office Performance Matrix */}
+        {activeTab === 'offices' && (
+          <div className="space-y-6">
+            <ReportsOfficesCharts summary={summary} />
 
-      {/* Tab 3: Office Analysis */}
-      {activeTab === 'offices' && (
-        <ReportsOfficesCharts summary={summary} />
-      )}
-
-      {/* Tab 4: Business Logs Table */}
-      {activeTab === 'details' && (
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base font-semibold">Business Contribution Log</CardTitle>
-              <CardDescription className="text-xs text-slate-400">Detailed list of recorded contribution entries</CardDescription>
-            </div>
-            <Button size="sm" variant="outline" onClick={handleExportBusinessCSV} className="text-xs border-white/10 text-slate-300">
-              <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border border-white/10 overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-white/5">
-                  <TableRow>
-                    <TableHead className="text-slate-300">Date</TableHead>
-                    <TableHead className="text-slate-300">Official</TableHead>
-                    <TableHead className="text-slate-300">Office</TableHead>
-                    <TableHead className="text-slate-300">Account Type</TableHead>
-                    <TableHead className="text-right text-slate-300">Accounts Opened</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {!summary.recentContributions || summary.recentContributions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-slate-500">
-                        No recent business contributions found for selected date range.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    summary.recentContributions.map((c: { _id?: string; contributionDate?: string; official?: { name?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }, index: number) => (
-                      <TableRow key={c._id || `rc-${index}`}>
-                        <TableCell className="text-xs text-slate-300 font-mono">
-                          {c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium text-white">
-                          {c.official?.name || 'Unknown'}
-                        </TableCell>
-                        <TableCell className="text-xs text-slate-400">{c.contributeOffice || 'N/A'}</TableCell>
-                        <TableCell className="text-xs text-slate-300">{c.accountType || 'N/A'}</TableCell>
-                        <TableCell className="text-xs font-semibold text-emerald-400 text-right">
-                          +{c.accountsOpened || 0}
-                        </TableCell>
+            <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-6 rounded-3xl">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-base font-bold text-white flex items-center justify-between">
+                  <span>Postal Office Performance Matrix</span>
+                  <span className="text-xs text-slate-400">{officeMatrix.length} Offices Registered</span>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Combined account contributions, insurance sum assured, and active official count by post office
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-950/40">
+                  <Table className="text-xs">
+                    <TableHeader>
+                      <TableRow className="border-b border-white/10 bg-white/5 uppercase text-[10px] font-bold tracking-wider text-slate-400">
+                        <TableHead className="py-3 px-4">Rank & Office</TableHead>
+                        <TableHead className="py-3 px-4 text-center">Active Officials</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Accounts Opened</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Insurance Sum Assured</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Initial Premium</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                    </TableHeader>
+                    <TableBody className="divide-y divide-white/5">
+                      {officeMatrix.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">No office matrix records found.</TableCell>
+                        </TableRow>
+                      ) : (
+                        officeMatrix.map((item, idx) => (
+                          <TableRow key={`matrix-${idx}`} className="hover:bg-white/5 transition-colors">
+                            <TableCell className="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
+                                idx === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold' :
+                                idx === 1 ? 'bg-slate-300/20 text-slate-200 border border-slate-300/30' :
+                                idx === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' :
+                                'bg-slate-800 text-slate-400'
+                              }`}>
+                                #{idx + 1}
+                              </span>
+                              {item.office}
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-center font-semibold text-indigo-300">
+                              {item.officialCount} officials
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-right font-bold text-sky-400">
+                              {item.accounts.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-right font-bold text-emerald-400">
+                              {formatCurrency(item.sumAssured)}
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-right font-semibold text-slate-200">
+                              {formatCurrency(item.premium)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-      {/* Tab 5: Insurance Particulars Logs Table */}
-      {activeTab === 'insurance_details' && (
-        <Card className="bg-slate-950/50 backdrop-blur-md border border-emerald-500/20 text-slate-100 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base font-semibold text-emerald-300">Insurance Particulars Log (PLI / RPLI)</CardTitle>
-              <CardDescription className="text-xs text-slate-400">Detailed list of recorded insurance policies and initial premiums</CardDescription>
-            </div>
-            <Button size="sm" variant="outline" onClick={handleExportInsuranceCSV} className="text-xs border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10">
-              <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Export Insurance CSV
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border border-white/10 overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-white/5">
-                  <TableRow>
-                    <TableHead className="text-slate-300">Date</TableHead>
-                    <TableHead className="text-slate-300">Official</TableHead>
-                    <TableHead className="text-slate-300">Indexing Office</TableHead>
-                    <TableHead className="text-slate-300">Type</TableHead>
-                    <TableHead className="text-right text-slate-300">Sum Assured</TableHead>
-                    <TableHead className="text-right text-slate-300">Initial Premium</TableHead>
-                    <TableHead className="text-slate-300">Remarks</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {!summary.insuranceContributions || summary.insuranceContributions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                        No insurance contributions found for selected date range.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    summary.insuranceContributions.map((ic: { _id?: string; contributionDate?: string; official?: { name?: string; designation?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number; remarks?: string }, index: number) => (
-                      <TableRow key={ic._id || `ic-${index}`}>
-                        <TableCell className="text-xs text-slate-300 font-mono">
-                          {ic.contributionDate ? new Date(ic.contributionDate).toLocaleDateString('en-IN') : 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium text-white">
-                          {ic.official?.name || 'Unknown'}
-                        </TableCell>
-                        <TableCell className="text-xs text-slate-400">{ic.officeOfIndexing || 'N/A'}</TableCell>
-                        <TableCell className="text-xs">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                            ic.insuranceType === 'PLI'
-                              ? 'bg-blue-500/10 text-blue-300 border-blue-500/20'
-                              : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-                          }`}>
-                            {ic.insuranceType || 'N/A'}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs font-semibold text-slate-200 text-right">
-                          {formatCurrency(ic.sumAssured || 0)}
-                        </TableCell>
-                        <TableCell className="text-xs font-bold text-emerald-400 text-right">
-                          {formatCurrency(ic.initialPremium || 0)}
-                        </TableCell>
-                        <TableCell className="text-xs text-slate-400 max-w-xs truncate">
-                          {ic.remarks || '-'}
-                        </TableCell>
+        {/* TAB 4: Insurance Deep-Dive */}
+        {activeTab === 'insurance_deepdive' && (
+          <div className="space-y-6">
+            <ReportsInsuranceCharts summary={summary} />
+
+            {/* Insurance Champions List */}
+            <Card className="bg-slate-950/50 backdrop-blur-md border border-emerald-500/20 text-slate-100 p-6 rounded-3xl">
+              <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-base font-bold text-white flex items-center justify-between">
+                  <span>Top Producing Officials (Insurance)</span>
+                  <span className="text-xs text-emerald-400">Leaderboard</span>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">Officials ranked by insurance sum assured performance</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-950/40">
+                  <Table className="text-xs">
+                    <TableHeader>
+                      <TableRow className="border-b border-white/10 bg-white/5 uppercase text-[10px] font-bold tracking-wider text-slate-400">
+                        <TableHead className="py-3 px-4">Rank & Official Name</TableHead>
+                        <TableHead className="py-3 px-4">Office & Designation</TableHead>
+                        <TableHead className="py-3 px-4 text-center">Policies Logged</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Sum Assured</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Initial Premium</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                    </TableHeader>
+                    <TableBody className="divide-y divide-white/5">
+                      {!(summary.insuranceByOfficial) || summary.insuranceByOfficial.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">No insurance official records found.</TableCell>
+                        </TableRow>
+                      ) : (
+                        summary.insuranceByOfficial.map((off: { name: string; office: string; designation?: string; totalSumAssured: number; totalInitialPremium: number; policies: number }, idx: number) => (
+                          <TableRow key={`ins-off-${idx}`} className="hover:bg-white/5 transition-colors">
+                            <TableCell className="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
+                                idx === 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' :
+                                idx === 1 ? 'bg-teal-500/20 text-teal-200 border border-teal-500/30' :
+                                idx === 2 ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' :
+                                'bg-slate-800 text-slate-400'
+                              }`}>
+                                #{idx + 1}
+                              </span>
+                              {off.name}
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-slate-300">
+                              {off.office} <span className="text-[10px] text-slate-500">({off.designation || 'Official'})</span>
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-center font-semibold text-emerald-400">
+                              {off.policies} policies
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-right font-black text-emerald-400">
+                              {formatCurrency(off.totalSumAssured)}
+                            </TableCell>
+                            <TableCell className="py-3.5 px-4 text-right font-semibold text-slate-200">
+                              {formatCurrency(off.totalInitialPremium)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 5: Detailed Audit Log */}
+        {activeTab === 'audit_log' && (
+          <div className="space-y-6">
+            {/* Accounts Audit Log */}
+            <Card className="bg-slate-950/50 backdrop-blur-md border border-white/10 text-slate-100 p-6 rounded-3xl">
+              <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-bold text-white flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-indigo-400" /> Account Contributions Log
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-400">Showing {filteredContributions.length} records</CardDescription>
+                </div>
+                <Button size="sm" onClick={handleExportAccountsCSV} className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 h-8 rounded-xl">
+                  <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-950/40">
+                  <Table className="text-xs">
+                    <TableHeader>
+                      <TableRow className="border-b border-white/10 bg-white/5 uppercase text-[10px] font-bold tracking-wider text-slate-400">
+                        <TableHead className="py-3 px-4">Date</TableHead>
+                        <TableHead className="py-3 px-4">Official Name</TableHead>
+                        <TableHead className="py-3 px-4">Office</TableHead>
+                        <TableHead className="py-3 px-4">Product Scheme</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Accounts Opened</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y divide-white/5">
+                      {filteredContributions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">No account contribution records match criteria.</TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredContributions.slice(0, 100).map((item: { _id?: string; contributionDate?: string; official?: { name?: string; office?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }, idx: number) => (
+                          <TableRow key={item._id || `act-${idx}`} className="hover:bg-white/5 transition-colors">
+                            <TableCell className="py-3 px-4 text-slate-300 font-mono">
+                              {item.contributionDate ? new Date(item.contributionDate).toLocaleDateString('en-IN') : 'N/A'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4 font-semibold text-white">
+                              {item.official?.name || 'Unknown'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4 text-slate-400">
+                              {item.contributeOffice || item.official?.office || 'N/A'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                {item.accountType || 'N/A'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-3 px-4 text-right font-black text-emerald-400">
+                              +{item.accountsOpened || 0}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Insurance Audit Log */}
+            <Card className="bg-slate-950/50 backdrop-blur-md border border-emerald-500/20 text-slate-100 p-6 rounded-3xl">
+              <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-bold text-white flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" /> Insurance Particulars Log
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-400">Showing {filteredInsurance.length} records</CardDescription>
+                </div>
+                <Button size="sm" onClick={handleExportInsuranceCSV} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 h-8 rounded-xl">
+                  <Download className="w-3.5 h-3.5 mr-1" /> Export CSV
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-950/40">
+                  <Table className="text-xs">
+                    <TableHeader>
+                      <TableRow className="border-b border-white/10 bg-white/5 uppercase text-[10px] font-bold tracking-wider text-slate-400">
+                        <TableHead className="py-3 px-4">Date</TableHead>
+                        <TableHead className="py-3 px-4">Official Name</TableHead>
+                        <TableHead className="py-3 px-4">Indexing Office</TableHead>
+                        <TableHead className="py-3 px-4">Type</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Sum Assured</TableHead>
+                        <TableHead className="py-3 px-4 text-right">Initial Premium</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y divide-white/5">
+                      {filteredInsurance.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">No insurance policy records match criteria.</TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredInsurance.slice(0, 100).map((item: { _id?: string; contributionDate?: string; official?: { name?: string; office?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number }, idx: number) => (
+                          <TableRow key={item._id || `ins-${idx}`} className="hover:bg-white/5 transition-colors">
+                            <TableCell className="py-3 px-4 text-slate-300 font-mono">
+                              {item.contributionDate ? new Date(item.contributionDate).toLocaleDateString('en-IN') : 'N/A'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4 font-semibold text-white">
+                              {item.official?.name || 'Unknown'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4 text-slate-400">
+                              {item.officeOfIndexing || item.official?.office || 'N/A'}
+                            </TableCell>
+                            <TableCell className="py-3 px-4">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                                item.insuranceType === 'PLI'
+                                  ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                                  : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                              }`}>
+                                {item.insuranceType || 'N/A'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-3 px-4 text-right font-semibold text-slate-200">
+                              {formatCurrency(item.sumAssured || 0)}
+                            </TableCell>
+                            <TableCell className="py-3 px-4 text-right font-black text-emerald-400">
+                              {formatCurrency(item.initialPremium || 0)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
-
-

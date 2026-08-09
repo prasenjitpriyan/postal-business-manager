@@ -14,12 +14,12 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
+    const office = searchParams.get('office') || undefined;
 
-    const summary = await ReportService.getDashboardSummary(startDate, endDate);
+    const summary = await ReportService.getDashboardSummary(startDate, endDate, office);
     return successResponse(summary);
 
   } catch (error: unknown) {
     return errorResponse((error as Error).message, 500);
   }
 }
-
