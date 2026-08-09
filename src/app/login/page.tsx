@@ -189,7 +189,7 @@ export default function LoginPage() {
                     <FormLabel className="text-slate-300">Password</FormLabel>
                     <FormControl>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 transition-colors group-focus-within:text-blue-400" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 transition-colors" />
                         <Input
                           type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
