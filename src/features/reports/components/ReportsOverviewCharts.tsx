@@ -49,18 +49,17 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
               {/* Pie Chart */}
-              <div className="h-56 w-full">
+              <div className="h-60 w-full relative flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={accountsData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={85}
-                      paddingAngle={3}
+                      innerRadius={45}
+                      outerRadius={75}
+                      paddingAngle={4}
                       dataKey="value"
-                      label={({ name, value }) => `${name} (${getPercentageString(value)})`}
                     >
                       {accountsData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
