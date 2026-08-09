@@ -118,15 +118,25 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
               <BarChart
                 data={summary.accountsByOfficial}
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
+                margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={11} />
-                <YAxis dataKey="name" type="category" width={110} stroke="rgba(255,255,255,0.4)" tick={{ fill: 'rgba(255,255,255,0.8)', fontSize: 11 }} />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  width={130} 
+                  stroke="rgba(255,255,255,0.4)" 
+                  tick={{ fill: 'rgba(255,255,255,0.85)', fontSize: 10, fontWeight: 500 }}
+                  tickFormatter={(val: string) => (val && val.length > 17 ? `${val.slice(0, 16)}…` : val)}
+                />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '12px' }}
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  formatter={(val: TooltipValue) => [`${(Number(val) || 0).toLocaleString()} accounts`, 'Accounts Opened']}
+                  formatter={(val: TooltipValue, _name: TooltipName, item: any) => [
+                    `${(Number(val) || 0).toLocaleString()} accounts`,
+                    item?.payload?.name || 'Accounts Opened'
+                  ]}
                 />
                 <Bar dataKey="accounts" name="Accounts Opened" fill="#4f46e5" radius={[0, 4, 4, 0]} />
               </BarChart>
