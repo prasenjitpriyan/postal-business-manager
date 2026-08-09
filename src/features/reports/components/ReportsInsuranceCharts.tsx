@@ -78,16 +78,17 @@ export function ReportsInsuranceCharts({ summary }: ReportsInsuranceChartsProps)
             <div className="flex h-full items-center justify-center text-xs text-slate-500">No indexing office data available</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={officeData} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
+              <BarChart data={officeData} layout="vertical" margin={{ top: 5, right: 25, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={11} tickFormatter={formatCurrencyShort} />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={130} 
+                  width={180} 
+                  interval={0}
                   stroke="rgba(255,255,255,0.4)" 
-                  tick={{ fill: 'rgba(255,255,255,0.85)', fontSize: 10, fontWeight: 500 }}
-                  tickFormatter={(val: string) => (val && val.length > 17 ? `${val.slice(0, 16)}…` : val)}
+                  tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600 }}
+                  tickFormatter={(val: string) => String(val || '')}
                 />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(20, 184, 166, 0.3)', color: '#fff', borderRadius: '12px' }}

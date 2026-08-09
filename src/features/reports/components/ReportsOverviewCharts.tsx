@@ -121,7 +121,7 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
           <CardTitle className="text-base font-bold text-white">Top Performing Officials</CardTitle>
           <CardDescription className="text-xs text-slate-400">Total volume of accounts opened per official</CardDescription>
         </CardHeader>
-        <CardContent className="h-72 pt-2">
+        <CardContent className="h-80 pt-2">
           {summary.accountsByOfficial.length === 0 ? (
             <div className="flex h-full items-center justify-center text-xs text-slate-500">No official data found</div>
           ) : (
@@ -129,17 +129,18 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
               <BarChart
                 data={summary.accountsByOfficial}
                 layout="vertical"
-                margin={{ top: 5, right: 25, left: 5, bottom: 5 }}
+                margin={{ top: 5, right: 25, left: 0, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={140} 
+                  width={180} 
+                  interval={0}
                   stroke="rgba(255,255,255,0.4)" 
-                  tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 10, fontWeight: 600 }}
-                  tickFormatter={(val: string) => formatOneLinerName(val)}
+                  tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600 }}
+                  tickFormatter={(val: string) => String(val || '')}
                 />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '12px' }}
