@@ -140,12 +140,12 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
                   interval={0}
                   stroke="rgba(255,255,255,0.4)" 
                   tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600 }}
-                  tickFormatter={(val: string) => String(val || '')}
+                  tickFormatter={(val: string) => formatOneLinerName(val)}
                 />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '12px' }}
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  formatter={(val: TooltipValue, _name: TooltipName, item: any) => [
+                  formatter={(val: TooltipValue, _name: TooltipName, item: { payload?: { name?: string } }) => [
                     `${(Number(val) || 0).toLocaleString()} accounts`,
                     item?.payload?.name || 'Accounts Opened'
                   ]}
