@@ -3,7 +3,7 @@
 import { useGSAP } from '@gsap/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { gsap } from 'gsap'
-import { Loader2, Lock, Mail, User as UserIcon } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Lock, Mail, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
@@ -42,6 +42,7 @@ type SignupFormValues = z.infer<typeof signupSchema>
 export default function SignupPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const container = useRef<HTMLDivElement>(null)
 
   useGSAP(
@@ -209,14 +210,27 @@ export default function SignupPage() {
                     <FormLabel className="text-slate-300">Password</FormLabel>
                     <FormControl>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 transition-colors" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 transition-colors group-focus-within:text-blue-400" />
                         <Input
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
-                          className="h-12 pl-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 transition-all rounded-xl"
+                          className="h-12 pl-12 pr-12 bg-slate-950/50 border-slate-800 text-white focus-visible:ring-blue-500 transition-all rounded-xl"
                           {...field}
                           disabled={isLoading}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors focus:outline-hidden p-1 rounded-md"
+                          title={showPassword ? 'Hide password' : 'Show password'}
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
                       </div>
                     </FormControl>
                     <FormMessage className="text-red-400" />
