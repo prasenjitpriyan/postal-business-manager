@@ -237,15 +237,25 @@ export class ReportService {
         totalSumAssured: slab.totalSumAssured
       }));
 
+      // Calculate exact ratio percentages for accountsByType
+      const accountsByTypeCalculated = bizResult.accountsByType.map((item: { _id: string; count: number }) => {
+        const count = item.count || 0;
+        const rawPct = totalAccounts > 0 ? (count / totalAccounts) * 100 : 0;
+        const formattedPercentage = rawPct < 0.1 && rawPct > 0 ? '<0.1%' : `${rawPct.toFixed(1)}%`;
+        return {
+          name: item._id || 'Unspecified',
+          value: count,
+          percentage: Number(rawPct.toFixed(2)),
+          formattedPercentage
+        };
+      });
+
       return {
         totalAccounts,
         totalEntries,
         avgAccountsPerEntry,
         availableOffices: (availableOffices || []).sort(),
-        accountsByType: bizResult.accountsByType.map((item: { _id: string; count: number }) => ({
-          name: item._id || 'Unspecified',
-          value: item.count
-        })),
+        accountsByType: accountsByTypeCalculated,
         accountsByOffice: bizResult.accountsByOffice.map((item: { _id: string; count: number }) => ({
           name: item._id || 'Unknown',
           accounts: item.count

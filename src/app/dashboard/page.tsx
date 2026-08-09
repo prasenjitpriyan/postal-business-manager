@@ -239,22 +239,24 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-500 py-6 text-center">No account product data recorded.</p>
           ) : (
             <div className="space-y-3.5 pt-1">
-              {stats.accountsByType.map((item: { type: string; count: number }, idx: number) => {
-                const percentage = stats.totalAccountsOpened > 0 
-                  ? Math.round((item.count / stats.totalAccountsOpened) * 100) 
+              {stats.accountsByType.map((item: { type: string; count: number; percentage?: number; formattedPercentage?: string }, idx: number) => {
+                const rawPct = stats.totalAccountsOpened > 0 
+                  ? (item.count / stats.totalAccountsOpened) * 100 
                   : 0;
+                const formattedPct = item.formattedPercentage || (rawPct < 0.1 && rawPct > 0 ? '<0.1%' : `${rawPct.toFixed(1)}%`);
+                const barWidth = Math.min(100, Math.max(1.5, rawPct));
                 return (
                   <div key={`type-${idx}`} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-semibold text-slate-200">{item.type}</span>
                       <span className="text-slate-400 font-mono">
-                        <strong className="text-white font-bold">{item.count.toLocaleString()}</strong> ({percentage}%)
+                        <strong className="text-white font-bold">{item.count.toLocaleString()}</strong> accounts ({formattedPct})
                       </span>
                     </div>
                     <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
                       <div 
                         className="bg-linear-to-r from-indigo-500 via-blue-500 to-sky-400 h-full rounded-full transition-all duration-700" 
-                        style={{ width: `${Math.min(100, Math.max(4, percentage))}%` }}
+                        style={{ width: `${barWidth}%` }}
                       />
                     </div>
                   </div>

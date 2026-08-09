@@ -162,10 +162,16 @@ export class DashboardService {
           office: o.office,
           totalAccounts: o.totalAccounts
         })),
-        accountsByType: accountsByTypeResult.map(a => ({
-          type: a._id || 'Other',
-          count: a.count
-        })),
+        accountsByType: accountsByTypeResult.map(a => {
+          const count = a.count || 0;
+          const pct = totalAccountsOpened > 0 ? (count / totalAccountsOpened) * 100 : 0;
+          return {
+            type: a._id || 'Other',
+            count,
+            percentage: Number(pct.toFixed(2)),
+            formattedPercentage: pct < 0.1 && pct > 0 ? '<0.1%' : `${pct.toFixed(1)}%`
+          };
+        }),
         insuranceStats: {
           totalSumAssured: insSum.totalSumAssured,
           totalInitialPremium: insSum.totalInitialPremium,
