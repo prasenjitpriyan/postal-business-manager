@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 const COLORS = ['#6366f1', '#ec4899', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6', '#14b8a6'];
 
 type TooltipValue = number | string | ReadonlyArray<number | string> | undefined;
+type TooltipName = number | string | undefined;
 
 interface ReportsOverviewChartsProps {
   summary: {
@@ -67,7 +68,7 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
                     </Pie>
                     <RechartsTooltip
                       contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(99, 102, 241, 0.3)', color: '#fff', borderRadius: '12px' }}
-                      formatter={(val: TooltipValue, name: any) => [
+                      formatter={(val: TooltipValue, name: TooltipName) => [
                         `${(Number(val) || 0).toLocaleString()} accounts (${getPercentageString(Number(val) || 0)})`,
                         `Scheme: ${name}`
                       ]}
