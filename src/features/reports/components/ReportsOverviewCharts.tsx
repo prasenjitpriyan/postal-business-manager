@@ -32,6 +32,17 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
     return `${pct.toFixed(1)}%`;
   };
 
+  // Helper to format official names into a clean single line (e.g. "SAILENDRA C. DAS")
+  const formatOneLinerName = (name: string) => {
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length <= 2) return name;
+    const first = parts[0];
+    const last = parts[parts.length - 1];
+    const middles = parts.slice(1, -1).map(m => `${m.charAt(0)}.`).join(' ');
+    return `${first} ${middles} ${last}`;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Pie & Ratio Breakdown Card: Accounts by Type */}
@@ -118,17 +129,17 @@ export function ReportsOverviewCharts({ summary }: ReportsOverviewChartsProps) {
               <BarChart
                 data={summary.accountsByOfficial}
                 layout="vertical"
-                margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
+                margin={{ top: 5, right: 25, left: 5, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  width={130} 
+                  width={140} 
                   stroke="rgba(255,255,255,0.4)" 
-                  tick={{ fill: 'rgba(255,255,255,0.85)', fontSize: 10, fontWeight: 500 }}
-                  tickFormatter={(val: string) => (val && val.length > 17 ? `${val.slice(0, 16)}…` : val)}
+                  tick={{ fill: 'rgba(255,255,255,0.9)', fontSize: 10, fontWeight: 600 }}
+                  tickFormatter={(val: string) => formatOneLinerName(val)}
                 />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#fff', borderRadius: '12px' }}
