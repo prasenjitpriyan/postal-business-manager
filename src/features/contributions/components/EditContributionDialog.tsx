@@ -24,16 +24,25 @@ export function EditContributionDialog({ contribution }: EditContributionDialogP
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    officialId: typeof contribution.officialId === 'object' && contribution.officialId !== null 
-      ? (contribution.officialId as { _id?: string })._id || String(contribution.officialId) 
-      : String(contribution.officialId),
-    contributionDate: contribution.contributionDate ? new Date(contribution.contributionDate).toISOString().split('T')[0] : '',
-    contributeOffice: contribution.contributeOffice || '',
-    accountType: contribution.accountType || '',
-    accountsOpened: contribution.accountsOpened || 1,
-    remarks: contribution.remarks || '',
+  const getFormData = (data: BusinessContribution) => ({
+    officialId: typeof data.officialId === 'object' && data.officialId !== null 
+      ? (data.officialId as { _id?: string })._id || String(data.officialId) 
+      : String(data.officialId || ''),
+    contributionDate: data.contributionDate ? new Date(data.contributionDate).toISOString().split('T')[0] : '',
+    contributeOffice: data.contributeOffice || '',
+    accountType: data.accountType || '',
+    accountsOpened: data.accountsOpened || 1,
+    remarks: data.remarks || '',
   });
+
+  const [formData, setFormData] = useState(() => getFormData(contribution));
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setFormData(getFormData(contribution));
+    }
+    setOpen(newOpen);
+  };
 
   // Fetch officials for the dropdown
   const { data: officialsData, isLoading: isLoadingOfficials } = useQuery({
@@ -91,13 +100,13 @@ export function EditContributionDialog({ contribution }: EditContributionDialogP
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors h-8 w-8"
         title="Edit Contribution"
       >
         <Pencil className="w-4 h-4" />
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md md:max-w-lg bg-slate-950/90 backdrop-blur-md border border-white/10 text-slate-100 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Contribution</DialogTitle>

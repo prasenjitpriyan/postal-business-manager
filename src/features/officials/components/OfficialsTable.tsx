@@ -181,7 +181,7 @@ export function OfficialsTable() {
         cell: ({ row }) => {
           return (
             <div className="flex gap-2">
-              <EditOfficialDialog official={row.original} />
+              <EditOfficialDialog key={row.original._id} official={row.original} />
               <DeleteOfficialDialog officialId={row.original._id} officialName={row.original.name} />
             </div>
           )

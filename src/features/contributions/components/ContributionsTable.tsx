@@ -192,7 +192,7 @@ export function ContributionsTable() {
         cell: ({ row }) => {
           return (
             <div className="flex gap-2">
-              <EditContributionDialog contribution={row.original} />
+              <EditContributionDialog key={row.original._id} contribution={row.original} />
               <DeleteContributionDialog contributionId={row.original._id} />
             </div>
           );

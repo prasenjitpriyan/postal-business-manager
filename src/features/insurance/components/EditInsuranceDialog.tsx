@@ -29,17 +29,26 @@ export function EditInsuranceDialog({ contribution }: EditInsuranceDialogProps) 
     return official || '';
   };
 
-  const [formData, setFormData] = useState({
-    officialId: getOfficialId(contribution.officialId),
-    contributionDate: contribution.contributionDate
-      ? new Date(contribution.contributionDate).toISOString().split('T')[0]
+  const getFormData = (data: InsuranceContribution) => ({
+    officialId: getOfficialId(data.officialId),
+    contributionDate: data.contributionDate
+      ? new Date(data.contributionDate).toISOString().split('T')[0]
       : '',
-    officeOfIndexing: contribution.officeOfIndexing || '',
-    insuranceType: contribution.insuranceType || 'PLI',
-    sumAssured: contribution.sumAssured ? String(contribution.sumAssured) : '',
-    initialPremium: contribution.initialPremium ? String(contribution.initialPremium) : '',
-    remarks: contribution.remarks || '',
+    officeOfIndexing: data.officeOfIndexing || '',
+    insuranceType: data.insuranceType || 'PLI',
+    sumAssured: data.sumAssured ? String(data.sumAssured) : '',
+    initialPremium: data.initialPremium ? String(data.initialPremium) : '',
+    remarks: data.remarks || '',
   });
+
+  const [formData, setFormData] = useState(() => getFormData(contribution));
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setFormData(getFormData(contribution));
+    }
+    setOpen(newOpen);
+  };
 
   const { data: officialsData, isLoading: isLoadingOfficials } = useQuery({
     queryKey: ['officials', 'all'],
@@ -100,13 +109,13 @@ export function EditInsuranceDialog({ contribution }: EditInsuranceDialogProps) 
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="h-8 w-8 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10"
         title="Edit Insurance Record"
       >
         <Edit2 className="h-4 w-4" />
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md md:max-w-lg bg-slate-950/90 backdrop-blur-md border border-white/10 text-slate-100 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-slate-100">

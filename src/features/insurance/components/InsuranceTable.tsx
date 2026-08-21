@@ -327,7 +327,7 @@ export function InsuranceTable() {
         id: 'actions',
         cell: ({ row }) => (
           <div className="flex items-center justify-end gap-1">
-            <EditInsuranceDialog contribution={row.original} />
+            <EditInsuranceDialog key={row.original._id} contribution={row.original} />
             <DeleteInsuranceDialog id={row.original._id} />
           </div>
         ),

@@ -25,16 +25,25 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    name: official.name || '',
-    designation: official.designation || '',
-    office: official.office || '',
-    employeeId: official.employeeId || '',
-    phone: official.phone || '',
-    email: official.email || '',
-    joiningDate: official.joiningDate ? new Date(official.joiningDate).toISOString().split('T')[0] : '',
-    status: official.status || OfficialStatus.ACTIVE,
+  const getFormData = (data: Official) => ({
+    name: data.name || '',
+    designation: data.designation || '',
+    office: data.office || '',
+    employeeId: data.employeeId || '',
+    phone: data.phone || '',
+    email: data.email || '',
+    joiningDate: data.joiningDate ? new Date(data.joiningDate).toISOString().split('T')[0] : '',
+    status: data.status || OfficialStatus.ACTIVE,
   });
+
+  const [formData, setFormData] = useState(() => getFormData(official));
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setFormData(getFormData(official));
+    }
+    setOpen(newOpen);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -78,13 +87,13 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors h-8 w-8"
         title="Edit Official"
       >
         <Pencil className="w-4 h-4" />
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md bg-slate-950/90 backdrop-blur-md border border-white/10 text-slate-100">
           <DialogHeader>
             <DialogTitle>Edit Official</DialogTitle>
