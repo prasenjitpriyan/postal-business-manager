@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Official } from '@/types/official';
 import { InsuranceContribution } from '@/types/insurance';
+import { OFFICE_OPTIONS } from '@/constants/offices';
 
 interface EditInsuranceDialogProps {
   contribution: InsuranceContribution;
@@ -167,14 +168,24 @@ export function EditInsuranceDialog({ contribution }: EditInsuranceDialogProps) 
                 <label htmlFor="officeOfIndexing" className="text-sm font-medium text-slate-200">
                   Office of Indexing *
                 </label>
-                <Input
+                <select
                   id="officeOfIndexing"
                   name="officeOfIndexing"
                   required
                   value={formData.officeOfIndexing}
                   onChange={handleChange}
-                  className="bg-slate-900/80 border-white/10 text-slate-100"
-                />
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-slate-900/80 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Sub Office</option>
+                  {formData.officeOfIndexing && !OFFICE_OPTIONS.some((off) => off.value === formData.officeOfIndexing) && (
+                    <option value={formData.officeOfIndexing}>{formData.officeOfIndexing}</option>
+                  )}
+                  {OFFICE_OPTIONS.map((off) => (
+                    <option key={off.code} value={off.value}>
+                      {off.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Official } from '@/types/official';
+import { OFFICE_OPTIONS } from '@/constants/offices';
 
 export function AddContributionDialog() {
   const [open, setOpen] = useState(false);
@@ -128,7 +129,21 @@ export function AddContributionDialog() {
               </div>
               <div className="space-y-2">
                 <label htmlFor="contributeOffice" className="text-sm font-medium">Office *</label>
-                <Input id="contributeOffice" name="contributeOffice" required value={formData.contributeOffice} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" placeholder="e.g. BO / SO" />
+                <select
+                  id="contributeOffice"
+                  name="contributeOffice"
+                  required
+                  value={formData.contributeOffice}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-slate-900/80 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Sub Office</option>
+                  {OFFICE_OPTIONS.map((off) => (
+                    <option key={off.code} value={off.value}>
+                      {off.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             

@@ -14,6 +14,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
 import { Official, OfficialStatus } from '@/types/official';
 import { Pencil } from 'lucide-react';
+import { OFFICE_OPTIONS } from '@/constants/offices';
 
 interface EditOfficialDialogProps {
   official: Official;
@@ -110,7 +111,24 @@ export function EditOfficialDialog({ official }: EditOfficialDialogProps) {
             </div>
             <div className="space-y-2">
               <label htmlFor="office" className="text-sm font-medium">Office *</label>
-              <Input id="office" name="office" required value={formData.office} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" />
+              <select
+                id="office"
+                name="office"
+                required
+                value={formData.office}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-white/10 bg-slate-900/80 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="" disabled>Select Sub Office</option>
+                {formData.office && !OFFICE_OPTIONS.some((off) => off.value === formData.office) && (
+                  <option value={formData.office}>{formData.office}</option>
+                )}
+                {OFFICE_OPTIONS.map((off) => (
+                  <option key={off.code} value={off.value}>
+                    {off.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="space-y-2">
