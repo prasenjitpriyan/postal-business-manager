@@ -5,6 +5,8 @@ import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
 
+import { updateInsuranceSchema } from '@/lib/validations';
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -18,6 +20,9 @@ export async function GET(
     const item = await InsuranceService.getInsuranceById(id);
     return successResponse(item);
   } catch (error: unknown) {
+    if ((error as Error).message === 'Insurance contribution not found') {
+      return errorResponse((error as Error).message, 404);
+    }
     return errorResponse((error as Error).message, 500);
   }
 }
@@ -35,9 +40,17 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
-    const updated = await InsuranceService.updateInsurance(id, body);
+    const parsed = updateInsuranceSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse(parsed.error.issues[0]?.message || 'Invalid input', 400);
+    }
+
+    const updated = await InsuranceService.updateInsurance(id, parsed.data);
     return successResponse(updated, 'Insurance contribution updated successfully');
   } catch (error: unknown) {
+    if ((error as Error).message === 'Insurance contribution not found' || (error as Error).message === 'Official not found') {
+      return errorResponse((error as Error).message, 404);
+    }
     return errorResponse((error as Error).message, 500);
   }
 }

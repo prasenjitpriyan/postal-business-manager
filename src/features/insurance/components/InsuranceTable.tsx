@@ -83,39 +83,16 @@ export function InsuranceTable() {
 
   const handleExportCSV = async () => {
     try {
-      let url = `/api/insurance?page=1&limit=10000&search=${encodeURIComponent(search)}&sort=${encodeURIComponent(JSON.stringify(sorting))}`;
-      if (startDate) url += `&startDate=${startDate}`;
-      if (endDate) url += `&endDate=${endDate}`;
-      if (typeFilter !== 'ALL') url += `&insuranceType=${typeFilter}`;
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (typeFilter !== 'ALL') params.append('insuranceType', typeFilter);
 
+      const url = `/api/reports/export/insurance?${params.toString()}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch insurance data for export');
-      const responseData = await res.json();
-      const contributions = responseData?.data?.contributions || [];
 
-      if (contributions.length === 0) {
-        toast.error('No insurance records match current filters to export.');
-        return;
-      }
-
-      const headers = ['Contribution Date', 'Official Name', 'Office of Indexing', 'Insurance Type', 'Sum Assured (INR)', 'Initial Premium (INR)', 'Remarks'];
-      const csvRows = [headers.join(',')];
-
-      contributions.forEach((c: InsuranceContribution) => {
-        const official = c.officialId as { name?: string };
-        const row = [
-          `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
-          `"${official?.name || 'N/A'}"`,
-          `"${c.officeOfIndexing || ''}"`,
-          `"${c.insuranceType || ''}"`,
-          c.sumAssured || 0,
-          c.initialPremium || 0,
-          `"${(c.remarks || '').replace(/"/g, '""')}"`
-        ];
-        csvRows.push(row.join(','));
-      });
-
-      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const blob = await res.blob();
       const downloadUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -123,10 +100,11 @@ export function InsuranceTable() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
       toast.success('Insurance records exported to CSV!');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error exporting insurance CSV:', err);
-      toast.error('Failed to export CSV report');
+      toast.error((err as Error).message || 'Failed to export CSV report');
     }
   };
 

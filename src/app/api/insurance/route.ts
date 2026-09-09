@@ -5,6 +5,7 @@ import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
 import { InsuranceType } from '@/types/insurance';
+import { clampPagination, insuranceSchema } from '@/lib/validations';
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,8 +15,7 @@ export async function GET(req: NextRequest) {
     if (!session) return errorResponse('Unauthorized', 401);
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit } = clampPagination(searchParams.get('page'), searchParams.get('limit'));
     const search = searchParams.get('search') || '';
     const startDate = searchParams.get('startDate') || undefined;
     const endDate = searchParams.get('endDate') || undefined;
@@ -59,12 +59,21 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    body.createdBy = session.id;
+    const parsed = insuranceSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse(parsed.error.issues[0]?.message || 'Invalid input', 400);
+    }
 
-    const contribution = await InsuranceService.createInsurance(body);
+    const contribution = await InsuranceService.createInsurance({
+      ...parsed.data,
+      createdBy: session.id,
+    });
 
     return successResponse(contribution, 'Insurance contribution added successfully', 201);
   } catch (error: unknown) {
+    if ((error as Error).message === 'Official not found') {
+      return errorResponse((error as Error).message, 404);
+    }
     return errorResponse((error as Error).message, 500);
   }
 }

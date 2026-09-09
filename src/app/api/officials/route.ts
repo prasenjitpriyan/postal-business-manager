@@ -4,6 +4,7 @@ import { OfficialService } from '@/features/officials/services/official.service'
 import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
+import { officialSchema, clampPagination } from '@/lib/validations';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,8 +14,7 @@ export async function GET(req: NextRequest) {
     if (!session) return errorResponse('Unauthorized', 401);
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit } = clampPagination(searchParams.get('page'), searchParams.get('limit'));
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
     const sortParam = searchParams.get('sort');
@@ -46,7 +46,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const official = await OfficialService.createOfficial(body);
+    const parsed = officialSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse(parsed.error.issues[0]?.message || 'Validation failed', 400);
+    }
+
+    const official = await OfficialService.createOfficial(parsed.data);
 
     return successResponse(official, 'Official added successfully', 201);
   } catch (error: unknown) {

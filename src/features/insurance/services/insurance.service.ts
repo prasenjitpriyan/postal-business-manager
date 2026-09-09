@@ -5,8 +5,8 @@ import mongoose from 'mongoose';
 
 export class InsuranceService {
   static async getInsuranceContributions(queryOptions: GetInsuranceQuery) {
-    const page = queryOptions.page || 1;
-    const limit = queryOptions.limit || 10;
+    const page = Math.max(queryOptions.page || 1, 1);
+    const limit = Math.min(Math.max(queryOptions.limit || 10, 1), 100);
     const search = queryOptions.search || '';
     const startDate = queryOptions.startDate;
     const endDate = queryOptions.endDate;
@@ -181,10 +181,30 @@ export class InsuranceService {
   }
 
   static async createInsurance(data: Record<string, unknown>) {
+    if (!data.officialId || !mongoose.Types.ObjectId.isValid(data.officialId as string)) {
+      throw new Error('Valid official ID is required');
+    }
+
+    const officialId = new mongoose.Types.ObjectId(data.officialId as string);
+    const officialExists = await Official.exists({ _id: officialId });
+    if (!officialExists) {
+      throw new Error('Official not found');
+    }
+
     return await InsuranceContribution.create(data);
   }
 
   static async updateInsurance(id: string, data: Record<string, unknown>) {
+    if (data.officialId) {
+      if (!mongoose.Types.ObjectId.isValid(data.officialId as string)) {
+        throw new Error('Valid official ID is required');
+      }
+      const officialExists = await Official.exists({ _id: new mongoose.Types.ObjectId(data.officialId as string) });
+      if (!officialExists) {
+        throw new Error('Official not found');
+      }
+    }
+
     const updated = await InsuranceContribution.findByIdAndUpdate(id, data, {
       returnDocument: 'after',
       runValidators: true,

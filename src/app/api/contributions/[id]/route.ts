@@ -4,6 +4,7 @@ import { ContributionService } from '@/features/contributions/services/contribut
 import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
+import { updateContributionSchema } from '@/lib/validations';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -32,7 +33,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const body = await req.json();
-    const contribution = await ContributionService.updateContribution(id, body);
+    const parsed = updateContributionSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse(parsed.error.issues[0]?.message || 'Invalid input', 400);
+    }
+
+    const contribution = await ContributionService.updateContribution(id, parsed.data);
 
     return successResponse(contribution, 'Contribution updated successfully');
   } catch (error: unknown) {

@@ -9,8 +9,8 @@ function escapeRegex(str: string): string {
 
 export class ContributionService {
   static async getContributions(queryOptions: GetContributionsQuery) {
-    const page = queryOptions.page || 1;
-    const limit = queryOptions.limit || 10;
+    const page = Math.max(queryOptions.page || 1, 1);
+    const limit = Math.min(Math.max(queryOptions.limit || 10, 1), 100);
     const search = queryOptions.search || '';
     const startDate = queryOptions.startDate;
     const endDate = queryOptions.endDate;
@@ -147,13 +147,28 @@ export class ContributionService {
   }
 
   static async createContribution(data: Record<string, unknown>) {
+    if (!data.officialId || !mongoose.Types.ObjectId.isValid(data.officialId as string)) {
+      throw new Error('Valid official ID is required');
+    }
+
+    const officialId = new mongoose.Types.ObjectId(data.officialId as string);
+    const officialExists = await Official.exists({ _id: officialId });
+    if (!officialExists) {
+      throw new Error('Official not found');
+    }
+
     const contributeOffice = (data.contributeOffice as string)?.trim();
     const accountType = (data.accountType as string)?.trim();
-    const officialId = new mongoose.Types.ObjectId(data.officialId as string);
+
+    const dateObj = new Date(data.contributionDate as string);
+    const startOfDay = new Date(dateObj);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(dateObj);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
     const filter: Record<string, unknown> = {
       officialId,
-      contributionDate: new Date(data.contributionDate as string),
+      contributionDate: { $gte: startOfDay, $lte: endOfDay },
       accountType: accountType
         ? { $regex: `^${escapeRegex(accountType)}$`, $options: 'i' }
         : (data.accountType as string),
@@ -177,15 +192,29 @@ export class ContributionService {
     if (!existing) throw new Error('Contribution not found');
 
     const officialIdStr = (data.officialId as string) || existing.officialId.toString();
+    if (!mongoose.Types.ObjectId.isValid(officialIdStr)) {
+      throw new Error('Valid official ID is required');
+    }
+
     const officialId = new mongoose.Types.ObjectId(officialIdStr);
-    const contributionDate = data.contributionDate ? new Date(data.contributionDate as string) : existing.contributionDate;
+    const officialExists = await Official.exists({ _id: officialId });
+    if (!officialExists) {
+      throw new Error('Official not found');
+    }
+
+    const dateObj = data.contributionDate ? new Date(data.contributionDate as string) : existing.contributionDate;
+    const startOfDay = new Date(dateObj);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(dateObj);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
     const accountType = ((data.accountType as string) || existing.accountType).trim();
     const contributeOffice = ((data.contributeOffice as string) || existing.contributeOffice).trim();
 
     const filter: Record<string, unknown> = {
       _id: { $ne: new mongoose.Types.ObjectId(id) },
       officialId,
-      contributionDate,
+      contributionDate: { $gte: startOfDay, $lte: endOfDay },
       accountType: { $regex: `^${escapeRegex(accountType)}$`, $options: 'i' },
       contributeOffice: { $regex: `^${escapeRegex(contributeOffice)}$`, $options: 'i' },
     };

@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Mail, Clock, CheckCircle2, MessageSquare, Trash2, Send, RefreshCw, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 interface ContactMessageItem {
@@ -286,7 +286,7 @@ export default function SupportMessagesPage() {
                 )}
 
                 {/* Reply Form */}
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 pt-2 text-slate-100">
                   <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
                     <span>{selectedMessage.replyNotes ? 'Update Reply Note' : 'Add Admin Reply Note'}</span>
                   </label>
@@ -295,7 +295,7 @@ export default function SupportMessagesPage() {
                     placeholder="Type your official response / resolution notes here..."
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    className="w-full p-3.5 rounded-xl bg-slate-900 border border-white/15 text-white text-sm placeholder:text-slate-500 focus:outline-hidden focus:border-blue-500 transition-colors resize-none"
+                    className="w-full p-3.5 rounded-xl bg-slate-900 border border-white/10 text-sm placeholder:text-slate-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-blue-500 transition-colors resize-none"
                   />
 
                   <div className="flex justify-end gap-3 pt-1">

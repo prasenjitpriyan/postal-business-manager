@@ -2,12 +2,18 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './lib/auth';
 
-const publicRoutes = ['/', '/login', '/api/auth/login', '/signup', '/api/auth/register'];
+const publicPages = ['/', '/login', '/signup', '/privacy', '/terms', '/contact'];
+const publicApiRoutes = ['/api/auth/login', '/api/auth/register'];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicRoutes.includes(pathname)) {
+  if (publicPages.includes(pathname) || publicApiRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Allow unauthenticated visitors to submit contact messages
+  if (pathname === '/api/contact' && request.method === 'POST') {
     return NextResponse.next();
   }
 

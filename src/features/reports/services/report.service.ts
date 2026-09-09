@@ -313,4 +313,52 @@ export class ReportService {
       throw new Error('Failed to fetch dashboard summary');
     }
   }
+
+  static async getContributionsForExport(startDate?: string, endDate?: string, officeFilter?: string) {
+    const matchStage: Record<string, unknown> = {};
+    if (startDate || endDate) {
+      matchStage.contributionDate = {};
+      if (startDate) (matchStage.contributionDate as Record<string, unknown>).$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        (matchStage.contributionDate as Record<string, unknown>).$lte = end;
+      }
+    }
+    if (officeFilter && officeFilter !== 'all') {
+      matchStage.contributeOffice = officeFilter;
+    }
+
+    return await BusinessContribution.find(matchStage)
+      .sort({ contributionDate: -1, createdAt: -1 })
+      .populate('officialId', 'name designation office')
+      .populate('createdBy', 'name email')
+      .lean();
+  }
+
+  static async getInsuranceForExport(startDate?: string, endDate?: string, officeFilter?: string, insuranceType?: string) {
+    const matchStage: Record<string, unknown> = {};
+    if (startDate || endDate) {
+      matchStage.contributionDate = {};
+      if (startDate) (matchStage.contributionDate as Record<string, unknown>).$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        (matchStage.contributionDate as Record<string, unknown>).$lte = end;
+      }
+    }
+    if (officeFilter && officeFilter !== 'all') {
+      matchStage.officeOfIndexing = officeFilter;
+    }
+    if (insuranceType && insuranceType !== 'ALL') {
+      matchStage.insuranceType = insuranceType;
+    }
+
+    return await InsuranceContribution.find(matchStage)
+      .sort({ contributionDate: -1, createdAt: -1 })
+      .populate('officialId', 'name designation office')
+      .populate('createdBy', 'name email')
+      .lean();
+  }
 }
+

@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
     const session = await getAuthSession(req);
     if (!session) return errorResponse('Unauthorized', 401);
 
-    const stats = await DashboardService.getDashboardStats();
+    const { searchParams } = new URL(req.url);
+    const forceRefresh = searchParams.get('refresh') === 'true';
+    const stats = await DashboardService.getDashboardStats(forceRefresh);
     return successResponse(stats);
 
   } catch (error: unknown) {

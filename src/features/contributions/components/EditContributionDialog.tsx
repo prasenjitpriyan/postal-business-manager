@@ -15,6 +15,7 @@ import { Official } from '@/types/official';
 import { BusinessContribution } from '@/types/contribution';
 import { Pencil } from 'lucide-react';
 import { OFFICE_OPTIONS } from '@/constants/offices';
+import { POSTAL_ACCOUNT_TYPE_OPTIONS } from '@/constants/accounts';
 
 interface EditContributionDialogProps {
   contribution: BusinessContribution;
@@ -167,8 +168,26 @@ export function EditContributionDialog({ contribution }: EditContributionDialogP
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="accountType" className="text-sm font-medium">Account Type *</label>
-                <Input id="accountType" name="accountType" required value={formData.accountType} onChange={handleChange} className="bg-slate-900/50 border-white/10 text-slate-100" placeholder="e.g. SB, RD, TD..." />
+                <label htmlFor="accountType" className="text-sm font-medium">Account Scheme *</label>
+                <select
+                  id="accountType"
+                  name="accountType"
+                  required
+                  value={formData.accountType}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-white/10 bg-slate-900/80 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 text-slate-100"
+                >
+                  <option value="" disabled>Select Scheme</option>
+                  {POSTAL_ACCOUNT_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.code} value={opt.code}>
+                      {opt.label}
+                    </option>
+                  ))}
+                  {/* Preserve existing custom value if it does not match predefined options */}
+                  {formData.accountType && !POSTAL_ACCOUNT_TYPE_OPTIONS.some((o) => o.code === formData.accountType) && (
+                    <option value={formData.accountType}>{formData.accountType} (Custom)</option>
+                  )}
+                </select>
               </div>
               <div className="space-y-2">
                 <label htmlFor="accountsOpened" className="text-sm font-medium">Accounts Opened *</label>

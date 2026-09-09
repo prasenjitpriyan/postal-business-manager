@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { User, Role } from '@/models/User';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { verifyToken } from '@/lib/auth';
 

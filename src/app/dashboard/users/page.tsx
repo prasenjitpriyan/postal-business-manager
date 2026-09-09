@@ -21,13 +21,11 @@ import {
   Users,
   Search,
   Loader2,
-  Sparkles,
   ArrowUpRight,
   ArrowDownRight,
   Shield,
   Eye,
   Crown,
-  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { gsap } from 'gsap';
@@ -47,7 +45,6 @@ export default function UserManagementPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [isClaiming, setIsClaiming] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Super Admin';
@@ -99,40 +96,6 @@ export default function UserManagementPage() {
     },
   });
 
-  const claimSuperAdminMutation = useMutation({
-    mutationFn: async () => {
-      setIsClaiming(true);
-      const res = await fetch('/api/users/claim-super-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.error || 'Failed to claim Super Admin role');
-      }
-      return resData;
-    },
-    onSuccess: (resData) => {
-      toast.success(resData.message || 'Super Admin privileges granted!');
-      queryClient.invalidateQueries({ queryKey: ['usersList'] });
-      if (currentUser && token && resData.data) {
-        login(
-          {
-            _id: resData.data._id,
-            name: resData.data.name,
-            email: resData.data.email,
-            role: resData.data.role,
-          },
-          token
-        );
-      }
-      setIsClaiming(false);
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Failed to claim Super Admin role');
-      setIsClaiming(false);
-    },
-  });
 
   useGSAP(
     () => {
@@ -192,22 +155,6 @@ export default function UserManagementPage() {
             Manage permissions across Super Admin (Project Owner), Admin, and Viewer roles in real-time.
           </p>
         </div>
-
-        {/* Claim Super Admin button for Project Creator */}
-        {!isSuperAdmin && (
-          <Button
-            onClick={() => claimSuperAdminMutation.mutate()}
-            disabled={isClaiming}
-            className="bg-linear-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white font-bold px-5 py-2.5 rounded-2xl shadow-lg shadow-purple-500/20 text-xs cursor-pointer flex items-center gap-2 hover:scale-102 transition-all"
-          >
-            {isClaiming ? (
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
-            ) : (
-              <Crown className="w-4 h-4 text-amber-300" />
-            )}
-            <span>Claim Super Admin (Creator Role)</span>
-          </Button>
-        )}
       </div>
 
       {/* KPI Overview Grid */}

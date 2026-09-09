@@ -204,66 +204,56 @@ export function ReportsDashboard() {
   }, [summary.recentContributions, summary.insuranceContributions]);
 
   // Export CSV Functions
-  const handleExportAccountsCSV = () => {
-    if (!summary.recentContributions || summary.recentContributions.length === 0) {
-      toast.error('No account contribution data available to export');
-      return;
+  const handleExportAccountsCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (selectedOffice && selectedOffice !== 'all') params.append('office', selectedOffice);
+
+      const url = `/api/reports/export/contributions?${params.toString()}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to export contributions');
+
+      const blob = await res.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `postal_account_contributions_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+      toast.success('Complete account contributions exported to CSV!');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to export contributions CSV');
     }
-
-    const headers = ['Contribution Date', 'Official Name', 'Designation', 'Office', 'Account Type', 'Accounts Opened'];
-    const csvRows = [headers.join(',')];
-
-    summary.recentContributions.forEach((c: { contributionDate?: string; official?: { name?: string; designation?: string; office?: string }; contributeOffice?: string; accountType?: string; accountsOpened?: number }) => {
-      const row = [
-        `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
-        `"${c.official?.name || 'N/A'}"`,
-        `"${c.official?.designation || ''}"`,
-        `"${c.contributeOffice || c.official?.office || ''}"`,
-        `"${c.accountType || ''}"`,
-        c.accountsOpened || 0
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `postal_account_contributions_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    toast.success('Account contributions CSV exported successfully!');
   };
 
-  const handleExportInsuranceCSV = () => {
-    if (!summary.insuranceContributions || summary.insuranceContributions.length === 0) {
-      toast.error('No insurance data available to export');
-      return;
+  const handleExportInsuranceCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (selectedOffice && selectedOffice !== 'all') params.append('office', selectedOffice);
+
+      const url = `/api/reports/export/insurance?${params.toString()}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to export insurance policies');
+
+      const blob = await res.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `postal_insurance_policies_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+      toast.success('Complete insurance policies exported to CSV!');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to export insurance CSV');
     }
-
-    const headers = ['Contribution Date', 'Official Name', 'Designation', 'Office of Indexing', 'Insurance Type', 'Sum Assured (INR)', 'Initial Premium (INR)', 'Remarks'];
-    const csvRows = [headers.join(',')];
-
-    summary.insuranceContributions.forEach((c: { contributionDate?: string; official?: { name?: string; designation?: string }; officeOfIndexing?: string; insuranceType?: string; sumAssured?: number; initialPremium?: number; remarks?: string }) => {
-      const row = [
-        `"${c.contributionDate ? new Date(c.contributionDate).toLocaleDateString('en-IN') : ''}"`,
-        `"${c.official?.name || 'N/A'}"`,
-        `"${c.official?.designation || ''}"`,
-        `"${c.officeOfIndexing || ''}"`,
-        `"${c.insuranceType || ''}"`,
-        c.sumAssured || 0,
-        c.initialPremium || 0,
-        `"${(c.remarks || '').replace(/"/g, '""')}"`
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `postal_insurance_policies_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    toast.success('Insurance policies CSV exported successfully!');
   };
 
   const handleExportMasterCSV = () => {

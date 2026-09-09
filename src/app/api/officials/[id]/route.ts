@@ -4,6 +4,7 @@ import { OfficialService } from '@/features/officials/services/official.service'
 import { successResponse, errorResponse } from '@/lib/apiResponse';
 import { getAuthSession } from '@/lib/auth';
 import { Role } from '@/models/User';
+import { updateOfficialSchema } from '@/lib/validations';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -32,7 +33,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const body = await req.json();
-    const official = await OfficialService.updateOfficial(id, body);
+    const parsed = updateOfficialSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse(parsed.error.issues[0]?.message || 'Validation failed', 400);
+    }
+
+    const official = await OfficialService.updateOfficial(id, parsed.data);
 
     return successResponse(official, 'Official updated successfully');
   } catch (error: unknown) {
@@ -55,8 +61,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return successResponse(null, 'Official deleted successfully');
   } catch (error: unknown) {
-    if ((error as Error).message === 'Official not found') return errorResponse((error as Error).message, 404);
-    return errorResponse((error as Error).message, 500);
+    const msg = (error as Error).message;
+    if (msg === 'Official not found') return errorResponse(msg, 404);
+    if (msg.includes('Cannot delete official')) return errorResponse(msg, 400);
+    return errorResponse(msg, 500);
   }
 }
 

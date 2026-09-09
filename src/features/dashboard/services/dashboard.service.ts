@@ -2,8 +2,25 @@ import { BusinessContribution } from '@/models/BusinessContribution';
 import { InsuranceContribution } from '@/models/InsuranceContribution';
 import { Official } from '@/models/Official';
 
+interface DashboardStatsCache {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  timestamp: number;
+}
+
+let cachedStats: DashboardStatsCache | null = null;
+const CACHE_TTL_MS = 45_000;
+
+export function clearDashboardCache() {
+  cachedStats = null;
+}
+
 export class DashboardService {
-  static async getDashboardStats() {
+  static async getDashboardStats(forceRefresh = false) {
+    if (!forceRefresh && cachedStats && Date.now() - cachedStats.timestamp < CACHE_TTL_MS) {
+      return cachedStats.data;
+    }
+
     try {
       const [
         totalContributions,
@@ -149,7 +166,7 @@ export class DashboardService {
       const pliData = insuranceByTypeResult.find(i => i._id === 'PLI') || { totalSumAssured: 0, totalInitialPremium: 0, count: 0 };
       const rpliData = insuranceByTypeResult.find(i => i._id === 'RPLI') || { totalSumAssured: 0, totalInitialPremium: 0, count: 0 };
 
-      return {
+      const stats = {
         totalContributions,
         totalAccountsOpened,
         totalOfficials,
@@ -200,6 +217,13 @@ export class DashboardService {
         })),
         recentInsuranceActivity
       };
+
+      cachedStats = {
+        data: stats,
+        timestamp: Date.now(),
+      };
+
+      return stats;
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       throw new Error('Failed to fetch dashboard stats');

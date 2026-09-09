@@ -1,8 +1,18 @@
 import { NextRequest } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key';
-const encodedSecret = new TextEncoder().encode(JWT_SECRET);
+const getJwtSecret = (): Uint8Array => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET must be defined in production environment variables.');
+    }
+    return new TextEncoder().encode('postal-business-manager-dev-secret-key-do-not-use-in-prod');
+  }
+  return new TextEncoder().encode(secret);
+};
+
+const encodedSecret = getJwtSecret();
 
 export interface SessionPayload {
   id: string;
