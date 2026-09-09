@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles, UserCog, Mail, Crown } from 'lucide-react';
+import { Users, FileText, Home, LogOut, Menu, ShieldCheck, BarChart3, X, Sparkles, UserCog, Mail, Crown, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PostalLogo } from '@/components/brand/PostalLogo';
 import { gsap } from 'gsap';
@@ -85,6 +85,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
+    { href: '/dashboard/targets', label: 'Targets & Goals', icon: Target },
     { href: '/dashboard/officials', label: 'Officials', icon: Users },
     { href: '/dashboard/contributions', label: 'Contributions', icon: FileText },
     { href: '/dashboard/insurance', label: 'Insurance (PLI/RPLI)', icon: ShieldCheck },
