@@ -5,6 +5,7 @@ import { Target } from '@/models/Target';
 import { BusinessContribution } from '@/models/BusinessContribution';
 import { InsuranceContribution } from '@/models/InsuranceContribution';
 import { ContactMessage } from '@/models/ContactMessage';
+import { AuditLog } from '@/models/AuditLog';
 
 // Ensure all models are initialized and registered in Mongoose schema cache
 const _appModels = [
@@ -14,6 +15,7 @@ const _appModels = [
   BusinessContribution,
   InsuranceContribution,
   ContactMessage,
+  AuditLog,
 ];
 void _appModels;
 
