@@ -2,13 +2,31 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './lib/auth';
 
-const publicPages = ['/', '/login', '/signup', '/privacy', '/terms', '/contact'];
+const publicPages = [
+  '/',
+  '/login',
+  '/signup',
+  '/privacy',
+  '/terms',
+  '/contact',
+  '/manifest.json',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/icon.png',
+  '/apple-icon.png',
+  '/twitter-image.png',
+  '/opengraph-image.png',
+];
 const publicApiRoutes = ['/api/auth/login', '/api/auth/register'];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicPages.includes(pathname) || publicApiRoutes.includes(pathname)) {
+  if (
+    publicPages.includes(pathname) ||
+    publicApiRoutes.includes(pathname) ||
+    /\.(?:png|jpg|jpeg|gif|svg|ico|webp|json|xml|txt)$/.test(pathname)
+  ) {
     return NextResponse.next();
   }
 
@@ -47,5 +65,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.json|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|json|txt|xml)$).*)'],
 };
+

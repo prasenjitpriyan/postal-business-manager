@@ -177,6 +177,67 @@ describe('TargetService - Unit & Integration Logic', () => {
     });
   });
 
+  describe('getTargets', () => {
+    it('handles populated officialId object without throwing BSON error', async () => {
+      const officialObjId = new Types.ObjectId('507f1f77bcf86cd799439011');
+      const fakeTargetDoc = {
+        _id: new Types.ObjectId('507f191e810c19729de860ea'),
+        financialYear: '2026-2027',
+        month: 6,
+        category: 'POSB',
+        metricType: 'ACCOUNTS_COUNT',
+        targetValue: 100,
+        division: 'Kolkata South Division',
+        office: 'Bhowanipore S.O',
+        // Populated officialId structure as returned by Mongoose
+        officialId: {
+          _id: officialObjId,
+          name: 'Debashis Roy',
+          designation: 'Postal Assistant',
+          office: 'Bhowanipore S.O',
+        },
+        toObject: function () {
+          return {
+            _id: this._id,
+            financialYear: this.financialYear,
+            month: this.month,
+            category: this.category,
+            metricType: this.metricType,
+            targetValue: this.targetValue,
+            division: this.division,
+            office: this.office,
+            officialId: this.officialId,
+          };
+        },
+      };
+
+      vi.mocked(Target.countDocuments).mockResolvedValueOnce(1);
+      const mockPopulate = vi.fn().mockReturnValue({
+        populate: vi.fn().mockReturnValue({
+          sort: vi.fn().mockReturnValue({
+            skip: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([fakeTargetDoc]),
+            }),
+          }),
+        }),
+      });
+      vi.mocked(Target.find).mockReturnValue({
+        populate: mockPopulate,
+      } as unknown as ReturnType<typeof Target.find>);
+
+      vi.mocked(BusinessContribution.aggregate).mockResolvedValueOnce([{ total: 42 }]);
+
+      const result = await TargetService.getTargets({
+        financialYear: '2026-2027',
+        limit: 100,
+      });
+
+      expect(result.targets).toHaveLength(1);
+      expect(result.targets[0].actual).toBe(42);
+      expect(result.targets[0].status).toBeDefined();
+    });
+  });
+
   describe('getTargetsSummary', () => {
     it('returns empty stats if no targets match filter', async () => {
       vi.mocked(Target.find).mockResolvedValueOnce([]);
@@ -188,3 +249,4 @@ describe('TargetService - Unit & Integration Logic', () => {
     });
   });
 });
+

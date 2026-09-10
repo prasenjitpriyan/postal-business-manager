@@ -16,6 +16,26 @@ function escapeRegex(str: string): string {
   return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
+function extractOfficialObjectId(officialId: unknown): mongoose.Types.ObjectId | null {
+  if (!officialId) return null;
+  if (officialId instanceof mongoose.Types.ObjectId) return officialId;
+  if (typeof officialId === 'object' && officialId !== null) {
+    const record = officialId as { _id?: unknown };
+    if (record._id) {
+      if (record._id instanceof mongoose.Types.ObjectId) return record._id;
+      const idStr = String(record._id);
+      if (mongoose.Types.ObjectId.isValid(idStr)) {
+        return new mongoose.Types.ObjectId(idStr);
+      }
+    }
+  }
+  const str = String(officialId);
+  if (mongoose.Types.ObjectId.isValid(str)) {
+    return new mongoose.Types.ObjectId(str);
+  }
+  return null;
+}
+
 export interface PeriodDateRange {
   startDate: Date;
   endDate: Date;
@@ -129,8 +149,9 @@ export class TargetService {
         contributionDate: { $gte: period.startDate, $lte: period.endDate },
       };
 
-      if (targetDoc.officialId) {
-        matchQuery.officialId = new mongoose.Types.ObjectId(targetDoc.officialId.toString());
+      const officialObjId = extractOfficialObjectId(targetDoc.officialId);
+      if (officialObjId) {
+        matchQuery.officialId = officialObjId;
       } else if (targetDoc.office && targetDoc.office !== 'ALL') {
         matchQuery.contributeOffice = {
           $regex: escapeRegex(targetDoc.office),
@@ -159,8 +180,9 @@ export class TargetService {
       contributionDate: { $gte: period.startDate, $lte: period.endDate },
     };
 
-    if (targetDoc.officialId) {
-      matchQuery.officialId = new mongoose.Types.ObjectId(targetDoc.officialId.toString());
+    const officialObjId = extractOfficialObjectId(targetDoc.officialId);
+    if (officialObjId) {
+      matchQuery.officialId = officialObjId;
     } else if (targetDoc.office && targetDoc.office !== 'ALL') {
       matchQuery.officeOfIndexing = {
         $regex: escapeRegex(targetDoc.office),
