@@ -325,7 +325,7 @@ describe('Audit Logging System - Event Tracking & Secret Protection', () => {
       expect(response.logs.length).toBe(1);
       expect(response.logs[0].action).toBe('CREATE');
 
-      const findCallArgs = vi.mocked(AuditLog.find).mock.calls[0][0] as Record<string, unknown>;
+      const findCallArgs = vi.mocked(AuditLog.find).mock.calls[0][0] as unknown as Record<string, unknown>;
       const tsFilter = findCallArgs.timestamp as Record<string, unknown>;
 
       expect(findCallArgs.action).toBe('CREATE');

@@ -182,7 +182,7 @@ describe('Data Quality Service - Forensic Audit & Detection', () => {
         .mockReturnValueOnce(
           mockQuery([
             { _id: 'ins-fut-1', insuranceType: 'PLI', sumAssured: 500000, contributionDate: futureDate },
-            { _id: 'ins-anc-1', insuranceType: 'RPLI', sumAssured: 200000, contributionDate: ancientDate },
+            { _id: 'ins-ancient-1', insuranceType: 'RPLI', sumAssured: 200000, contributionDate: ancientDate },
           ]) as never
         )
         .mockReturnValue(mockQuery([]) as never);

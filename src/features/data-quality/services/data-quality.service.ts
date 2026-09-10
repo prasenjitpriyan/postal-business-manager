@@ -1,3 +1,4 @@
+/* cspell:ignore nin */
 import { Official } from '@/models/Official';
 import { InsuranceContribution } from '@/models/InsuranceContribution';
 import { BusinessContribution } from '@/models/BusinessContribution';

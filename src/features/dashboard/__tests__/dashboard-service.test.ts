@@ -61,6 +61,21 @@ interface MockQueryChain {
   lean: ReturnType<typeof vi.fn>;
 }
 
+interface AggStage {
+  $match?: {
+    contributionDate?: {
+      $gte?: Date;
+      $lte?: Date;
+      $lt?: Date;
+    };
+  };
+  $group?: {
+    _id?: unknown;
+    total?: unknown;
+    lastDate?: unknown;
+  };
+}
+
 function createMockQuery(result: unknown[] = []): MockQueryChain {
   const query: Partial<MockQueryChain> = {};
   query.sort = vi.fn().mockReturnValue(query);
@@ -121,21 +136,6 @@ describe('Dashboard Service - State & Data Volume Scenarios', () => {
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
       const startOfMTD = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-
-interface AggStage {
-  $match?: {
-    contributionDate?: {
-      $gte?: Date;
-      $lte?: Date;
-      $lt?: Date;
-    };
-  };
-  $group?: {
-    _id?: unknown;
-    total?: unknown;
-    lastDate?: unknown;
-  };
-}
 
       vi.mocked(BusinessContribution.aggregate).mockImplementation((async (pipeline: unknown[]) => {
         const stages = pipeline as AggStage[];
