@@ -140,7 +140,8 @@ export function InsuranceTable() {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
     }).format(amount || 0);
   };
 

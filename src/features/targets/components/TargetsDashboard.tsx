@@ -106,6 +106,7 @@ export function TargetsDashboard() {
         style: 'currency',
         currency: 'INR',
         maximumFractionDigits: 0,
+        minimumFractionDigits: 0,
       }).format(val || 0);
     }
     return Number(val || 0).toLocaleString('en-IN');
