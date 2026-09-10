@@ -1,4 +1,10 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { Official } from './Official';
+import { User } from './User';
+
+// Ensure referenced models are registered in Mongoose schema cache for populate()
+const _businessModelRefs = { Official, User };
+void _businessModelRefs;
 
 export interface IBusinessContribution extends Document {
   officialId: mongoose.Types.ObjectId;

@@ -1,5 +1,11 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { TargetCategory, MetricType } from '@/types/target';
+import { Official } from './Official';
+import { User } from './User';
+
+// Ensure referenced models are registered in Mongoose schema cache for populate()
+const _targetModelRefs = { Official, User };
+void _targetModelRefs;
 
 export interface ITarget extends Document {
   title?: string;

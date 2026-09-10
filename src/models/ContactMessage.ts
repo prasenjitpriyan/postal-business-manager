@@ -27,5 +27,8 @@ const ContactMessageSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.ContactMessage ||
+export const ContactMessage: mongoose.Model<IContactMessage> =
+  mongoose.models.ContactMessage ||
   mongoose.model<IContactMessage>('ContactMessage', ContactMessageSchema);
+
+export default ContactMessage;

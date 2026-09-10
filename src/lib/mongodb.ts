@@ -1,4 +1,21 @@
 import mongoose from 'mongoose';
+import { User } from '@/models/User';
+import { Official } from '@/models/Official';
+import { Target } from '@/models/Target';
+import { BusinessContribution } from '@/models/BusinessContribution';
+import { InsuranceContribution } from '@/models/InsuranceContribution';
+import { ContactMessage } from '@/models/ContactMessage';
+
+// Ensure all models are initialized and registered in Mongoose schema cache
+const _appModels = [
+  User,
+  Official,
+  Target,
+  BusinessContribution,
+  InsuranceContribution,
+  ContactMessage,
+];
+void _appModels;
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 

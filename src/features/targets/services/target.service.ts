@@ -3,6 +3,11 @@ import { Target, ITarget } from '@/models/Target';
 import { BusinessContribution } from '@/models/BusinessContribution';
 import { InsuranceContribution } from '@/models/InsuranceContribution';
 import { Official } from '@/models/Official';
+import { User } from '@/models/User';
+
+// Ensure referenced models are registered in Mongoose schema cache for populate()
+void Official;
+void User;
 import {
   GetTargetsQuery,
   TargetDocument,

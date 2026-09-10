@@ -35,8 +35,5 @@ OfficialSchema.index({ office: 1 })
 OfficialSchema.index({ designation: 1 })
 OfficialSchema.index({ employeeId: 1 })
 
-// Clear mongoose model cache for hot reload in development
-if (mongoose.models.Official) {
-  delete mongoose.models.Official
-}
-export const Official: Model<IOfficial> = mongoose.model<IOfficial>('Official', OfficialSchema)
+export const Official: Model<IOfficial> =
+  mongoose.models.Official || mongoose.model<IOfficial>('Official', OfficialSchema);
